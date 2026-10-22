@@ -1,0 +1,720 @@
+:focus-visible {
+  outline: var(--border-width) solid var(--color-orange);
+  outline-offset: var(--space-1);
+}
+
+/* Read by assistive tech, invisible on screen. */
+.visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+  border: 0;
+}
+
+/* Keep the focus ring visible on tinted/blue surfaces where the orange-on-white
+   token reads too faint at 1px.
+   TODO: revisit if a stronger focus token gets added to tokens.css. */
+.nav__link:focus-visible,
+.nav__brand:focus-visible,
+.cta:focus-visible,
+.faq__trigger:focus-visible,
+.phase-button:focus-visible {
+  outline: calc(var(--border-width) * 2) solid var(--color-orange);
+  outline-offset: var(--space-2);
+}
+
+.card {
+  display: flex;
+  flex-direction: column;
+  background-color: var(--color-card);
+  border: var(--card-border);
+  border-radius: var(--radius-card);
+  box-shadow: var(--shadow-card);
+  overflow: hidden;
+}
+
+.card__strip {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-4);
+  padding: var(--space-3) var(--space-4);
+  background-color: var(--color-blueprint);
+  border-bottom: var(--grid-line);
+}
+
+.card__label {
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: var(--fs-caps);
+  font-weight: 400;
+  letter-spacing: var(--track-caps);
+  text-transform: uppercase;
+  color: var(--color-ink);
+}
+
+.card__body {
+  padding: var(--space-6);
+}
+
+.card__body > :first-child {
+  margin-top: 0;
+}
+
+.card__body > :last-child {
+  margin-bottom: 0;
+}
+
+.icon-box {
+  display: grid;
+  place-items: center;
+  flex: none;
+  width: var(--icon-box);
+  height: var(--icon-box);
+  background-color: var(--color-card);
+  border: var(--grid-line);
+  border-radius: var(--radius-icon);
+  color: var(--color-blue);
+}
+
+.icon-box > svg {
+  width: 58%;
+  height: 58%;
+}
+
+.icon-box--ink {
+  color: var(--color-ink);
+}
+
+.nav__brand {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.nav__mark {
+  display: block;
+  width: var(--icon-box);
+  height: var(--icon-box);
+  color: var(--color-blue);
+}
+
+.nav__word {
+  font-family: var(--font-display);
+  font-size: var(--fs-h3);
+  letter-spacing: var(--track-caps);
+  text-transform: uppercase;
+  color: var(--color-ink);
+}
+
+.nav__links {
+  display: flex;
+  align-items: center;
+  gap: var(--space-1);
+  padding: var(--space-1);
+  background-color: var(--color-blueprint);
+  border-radius: var(--radius-pill);
+}
+
+.nav__link {
+  padding: var(--space-2) var(--space-4);
+  font-family: var(--font-body);
+  font-size: var(--fs-sm);
+  font-weight: 600;
+  color: var(--color-ink);
+  text-decoration: none;
+  border-radius: var(--radius-pill);
+  transition: background-color var(--transition) var(--ease-soft);
+}
+
+.nav__link:hover {
+  background-color: var(--color-card);
+}
+
+.cta {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  padding: var(--space-2) var(--space-6);
+  background-color: var(--color-orange);
+  color: var(--color-white);
+  font-family: var(--font-display);
+  font-size: var(--fs-sm);
+  letter-spacing: var(--track-caps);
+  text-transform: uppercase;
+  text-decoration: none;
+  border: var(--border-width) solid var(--color-ink);
+  border-radius: var(--radius-pill);
+  cursor: pointer;
+}
+
+.cta {
+  transition: transform var(--motion-fast) var(--ease), background-color var(--transition) var(--ease-soft);
+}
+
+.cta:hover {
+  background-color: var(--color-ink);
+  transform: translateY(-2px);
+}
+
+.cta:active {
+  transform: translateY(0);
+}
+
+.phase-button {
+  transition: transform var(--motion-fast) var(--ease), background-color var(--transition) var(--ease-soft);
+}
+
+.phase-button:hover {
+  transform: translateY(-2px);
+}
+
+.phase-button:active {
+  transform: translateY(0);
+}
+
+.band {
+  display: flex;
+  align-items: center;
+  flex: none;
+  gap: var(--space-8);
+  padding-block: var(--space-3);
+  font-family: var(--font-display);
+  font-size: var(--fs-h3);
+  letter-spacing: var(--track-caps);
+  text-transform: uppercase;
+}
+
+.band--ink {
+  background-color: var(--color-ink);
+  color: var(--color-white);
+}
+
+.band--blue {
+  background-color: var(--color-blue);
+  color: var(--color-white);
+}
+
+.band__star {
+  flex: none;
+  width: var(--space-6);
+  height: var(--space-6);
+  color: var(--color-orange);
+}
+
+.headline {
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: var(--fs-hero);
+  font-weight: 400;
+  line-height: var(--leading-tight);
+  letter-spacing: var(--track-caps);
+  text-transform: uppercase;
+  color: var(--color-ink);
+}
+
+.headline--accent {
+  color: var(--color-blue);
+}
+
+.lede {
+  max-width: 42ch;
+  font-size: var(--fs-h3);
+  line-height: var(--leading-body);
+  color: var(--color-muted);
+}
+
+.eyebrow {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  font-family: var(--font-display);
+  font-size: var(--fs-caps);
+  letter-spacing: var(--track-caps);
+  text-transform: uppercase;
+  color: var(--color-orange);
+}
+
+/* Typewriter: the caret sits right after the typed text and blinks while the
+   words are coming in. It stays hidden until the typing starts, and the blink
+   is dropped when the caret fades out. */
+.type-caret {
+  display: inline-block;
+  visibility: hidden;
+  flex: none;
+  width: 2px;
+  height: 1.1em;
+  background-color: var(--color-orange);
+  animation: caret-blink var(--type-caret-blink) infinite;
+}
+
+.type-caret--on {
+  visibility: visible;
+}
+
+.type-caret--done {
+  animation: none;
+}
+
+/* The eyebrow lays its children out with a gap, so the caret is pulled back
+   against the text. */
+.eyebrow .type-caret {
+  margin-left: calc(-1 * var(--space-2) + 2px);
+}
+
+/* Typewriter: the caret sits right after the typed eyebrow and blinks while
+   the words are coming in. It stays hidden until the typing starts, and the
+   blink is dropped when the caret fades out. */
+.hero .eyebrow__caret {
+  visibility: hidden;
+  flex: none;
+  width: 2px;
+  height: 1.1em;
+  /* Pull the caret back against the text; the eyebrow's flex gap is meant
+     for the standalone eyebrows. */
+  margin-left: calc(-1 * var(--space-2) + 2px);
+  background-color: var(--color-orange);
+  animation: caret-blink var(--type-caret-blink) infinite;
+}
+
+.hero .eyebrow--typing .eyebrow__caret {
+  visibility: visible;
+}
+
+.hero .eyebrow__caret--done {
+  animation: none;
+}
+
+@keyframes caret-blink {
+  0%,
+  49.99% {
+    opacity: 1;
+  }
+
+  50%,
+  100% {
+    opacity: 0;
+  }
+}
+
+.steps {
+  display: grid;
+  gap: var(--space-6);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  counter-reset: step;
+}
+
+.steps__item {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-4);
+}
+
+.steps__item::before {
+  counter-increment: step;
+  content: counter(step, decimal-leading-zero);
+  font-family: var(--font-display);
+  font-size: var(--fs-h3);
+  color: var(--color-blue);
+}
+
+.steps__key {
+  font-family: var(--font-display);
+  font-size: var(--fs-caps);
+  letter-spacing: var(--track-caps);
+  text-transform: uppercase;
+  color: var(--color-ink);
+}
+
+.faq__item {
+  border-bottom: var(--grid-line);
+}
+
+.faq__trigger {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-4);
+  padding: var(--space-4) 0;
+  font-family: var(--font-display);
+  font-size: var(--fs-h3);
+  letter-spacing: var(--track-caps);
+  text-transform: uppercase;
+  cursor: pointer;
+  list-style: none;
+}
+
+.faq__trigger::-webkit-details-marker {
+  display: none;
+}
+
+.faq__answer {
+  margin: 0;
+  padding: 0 0 var(--space-6);
+  color: var(--color-muted);
+}
+
+.counters {
+  display: flex;
+  gap: var(--space-8);
+}
+
+/* The label above the board and the bar below it: the inspect toggle and
+   the counters sit under the stage. */
+.play__label {
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: var(--fs-h2);
+  font-weight: 400;
+  letter-spacing: var(--track-caps);
+  text-transform: uppercase;
+  color: var(--color-blue);
+}
+
+.play__bar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-6);
+}
+
+/* The hero's call to action hugs its label instead of stretching the column. */
+.hero .stack > .cta {
+  align-self: flex-start;
+}
+
+/* Keep SCORE/LINES/LEVEL on one line next to the narrow stage. */
+@media (max-width: 25rem) {
+  .counters {
+    gap: var(--space-4);
+  }
+}
+
+.counters__item {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+}
+
+.counters__label {
+  font-family: var(--font-display);
+  font-size: var(--fs-caps);
+  letter-spacing: var(--track-caps);
+  text-transform: uppercase;
+  color: var(--color-muted);
+}
+
+.counters__value {
+  font-family: var(--font-display);
+  font-size: var(--fs-h3);
+  color: var(--color-ink);
+}
+
+.counters__value--pop {
+  animation: counter-pop var(--motion-med) var(--ease);
+}
+
+@keyframes counter-pop {
+  0% {
+    transform: scale(1);
+  }
+
+  35% {
+    transform: scale(1.15);
+  }
+
+  100% {
+    transform: scale(1);
+  }
+}
+
+.footer {
+  padding-block: var(--space-12);
+  background-color: var(--color-ink);
+  color: var(--color-white);
+}
+
+.footer a {
+  color: var(--color-white);
+  text-decoration: none;
+}
+
+.footer a:hover {
+  color: var(--color-orange);
+}
+
+.phase-banner {
+  display: inline-block;
+  margin: var(--space-12);
+  padding: var(--space-6) var(--space-12);
+  background-color: var(--color-blue);
+  color: var(--color-white);
+  font-family: var(--font-display);
+  font-size: var(--fs-h2);
+  letter-spacing: var(--track-caps);
+  text-transform: uppercase;
+  border: var(--border-width) solid var(--color-white);
+  border-radius: var(--radius-card);
+  box-shadow: var(--shadow-card);
+}
+
+.phase-stage {
+  position: relative;
+  width: 100%;
+  max-width: var(--stage-width);
+  margin: var(--space-12) auto;
+  aspect-ratio: var(--stage-aspect);
+  background-color: var(--color-card);
+  border: var(--card-border);
+  border-radius: var(--radius-card);
+  overflow: hidden;
+}
+
+.board-canvas {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+/* A long hard drop nudges the board: two pixels, gone in a breath. Only the
+   canvas moves, so the page around it never shifts. */
+.board-canvas--shake {
+  animation: board-shake var(--land-shake) var(--ease);
+}
+
+@keyframes board-shake {
+  0% {
+    transform: translate3d(0, 0, 0);
+  }
+
+  25% {
+    transform: translate3d(2px, -2px, 0);
+  }
+
+  50% {
+    transform: translate3d(-2px, 1px, 0);
+  }
+
+  75% {
+    transform: translate3d(1px, 2px, 0);
+  }
+
+  100% {
+    transform: translate3d(0, 0, 0);
+  }
+}
+
+.phase-controls {
+  display: flex;
+  gap: var(--space-3);
+  justify-content: center;
+  padding-bottom: var(--space-12);
+}
+
+.phase-button {
+  padding: var(--space-2) var(--space-6);
+  background-color: var(--color-orange);
+  color: var(--color-white);
+  font-family: var(--font-display);
+  font-size: var(--fs-sm);
+  letter-spacing: var(--track-caps);
+  text-transform: uppercase;
+  border: var(--border-width) solid var(--color-ink);
+  border-radius: var(--radius-pill);
+  cursor: pointer;
+}
+
+.phase-button:hover,
+.phase-button[aria-pressed='true'] {
+  background-color: var(--color-ink);
+}
+
+.game-over {
+  position: absolute;
+  z-index: var(--layer-overlay);
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: color-mix(in srgb, var(--color-ink) 85%, transparent);
+}
+
+.game-over[hidden] {
+  display: none;
+}
+
+.game-over--shown {
+  animation: game-over-in var(--motion-med) var(--ease);
+}
+
+.game-over--shown .game-over__panel {
+  animation: game-over-panel var(--motion-med) var(--ease);
+}
+
+@keyframes game-over-in {
+  from {
+    opacity: 0;
+  }
+
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes game-over-panel {
+  from {
+    opacity: 0;
+    transform: scale(0.85);
+  }
+
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+/* Scroll fade: the section that fills the viewport stays bright, the ones
+   around it dim down and slide towards the edge they left through. The
+   observer writes --fade-opacity and --fade-shift; without it (reduced
+   motion, no observer) the sections keep their normal, fully visible state.
+   Nothing is hidden, so focus, Ctrl+F and screen readers still reach it. */
+.section {
+  opacity: 1; /* default visible; the observer takes it from there */
+}
+
+.section-fade {
+  opacity: var(--fade-opacity, 1);
+  transform: translateY(var(--fade-shift, 0px));
+  transition:
+    opacity var(--fade-duration) var(--ease-soft),
+    transform var(--fade-duration) var(--ease-soft);
+}
+
+/* Page-load intro: the nav slides down and fades in, the hero headline
+   reveals line by line from a clipped mask, then the lede and play stage
+   fade up. JS adds .intro-armed (the hidden start) and then drives the
+   elements with the Web Animations API; without JS — and under reduced
+   motion — the finished page is the default state. */
+html.intro-armed .nav {
+  opacity: 0;
+  transform: translateY(calc(-1 * var(--space-4)));
+}
+
+html.intro-armed .hero .eyebrow,
+html.intro-armed .hero .lede {
+  opacity: 0;
+  transform: translateY(var(--space-3));
+}
+
+/* Headline lines are clipping masks; each line slides up from below.
+   The line elements only exist once JS has split the headline, so the
+   hidden start can live in the base styles. */
+.headline--pending {
+  opacity: 0;
+}
+
+.hero .headline__line {
+  display: block;
+  overflow: hidden;
+  padding-block: 0.08em 0.16em;
+  margin-block: -0.08em -0.16em;
+}
+
+.hero .headline__line-inner {
+  display: block;
+  /* Far enough down that the line is fully clipped while it waits. */
+  transform: translateY(130%);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .cta:hover,
+  .cta:active,
+  .phase-button:hover,
+  .phase-button:active {
+    transform: none;
+  }
+
+  .counters__value--pop {
+    animation: none;
+  }
+
+  .game-over--shown,
+  .game-over--shown .game-over__panel {
+    animation: none;
+  }
+
+  /* No fades under reduced motion: every section stays fully visible. */
+  .section-fade {
+    opacity: 1;
+    transform: none;
+    transition: none;
+  }
+
+  /* Intro shows its final state instantly. */
+  html.intro-armed .nav,
+  html.intro-armed .hero .eyebrow,
+  html.intro-armed .hero .lede,
+  .headline--pending {
+    opacity: 1;
+    transform: none;
+  }
+
+  .hero .headline__line-inner {
+    transform: none;
+  }
+
+  /* The typewriter never runs under reduced motion, so the caret stays
+     hidden and the finished copy is left in place. */
+  .hero .eyebrow__caret,
+  .type-caret {
+    visibility: hidden;
+    animation: none;
+  }
+
+  /* A landing never shakes the board under reduced motion. */
+  .board-canvas--shake {
+    animation: none;
+  }
+}
+
+.game-over__panel {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-4);
+  padding: var(--space-8) var(--space-12);
+  background-color: var(--color-card);
+  border: var(--card-border);
+  border-radius: var(--radius-card);
+}
+
+.game-over__title {
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: var(--fs-h2);
+  letter-spacing: var(--track-caps);
+  text-transform: uppercase;
+  color: var(--color-blue);
+}
+
+.game-over__score {
+  margin: 0;
+  font-family: var(--font-body);
+  font-size: var(--fs-body);
+  color: var(--color-ink);
+}
+
+.game-over__hint {
+  margin: 0;
+  font-family: var(--font-body);
+  font-size: var(--fs-sm);
+  color: var(--color-muted);
+}

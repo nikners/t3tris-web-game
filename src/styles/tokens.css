@@ -1,0 +1,136 @@
+:root {
+  /* color (primary palette) */
+  --color-blue: #1e00f6;
+  --color-orange: #ff622a;
+  --color-ink: #212121;
+  --color-page-bg: #ececec;
+  --color-card: #ffffff;
+  --color-white: #ffffff;
+
+  /* derived tokens (also live only here) */
+  --color-line: #c9c9d6;
+  --color-muted: #5a5a6a;
+  --color-blueprint: rgba(30, 0, 246, 0.1);
+  --blueprint-cell: 32px;
+
+  /* tetromino tones - all distinct on the white board base */
+  --tone-i: #ff622a;
+  --tone-o: #f2b705;
+  --tone-t: #212121;
+  --tone-s: #1e00f6;
+  --tone-z: #7d70ff;
+  --tone-j: #0b009c;
+  --tone-l: #8a8a9a;
+
+  /* fonts */
+  --font-display: 'Anton', 'Arial Narrow', Impact, sans-serif;
+  --font-body: 'Inter', system-ui, -apple-system, 'Segoe UI', sans-serif;
+
+  /* spacing */
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-6: 24px;
+  --space-8: 32px;
+  --space-12: 48px;
+  --space-16: 64px;
+  --container-max: 1200px;
+
+  /* radius */
+  --radius-sm: 4px;
+  --radius-card: 8px;
+  --radius-pill: 999px;
+  --radius-icon: 6px;
+
+  /* borders */
+  --border-width: 1px;
+  --card-border: var(--border-width) solid var(--color-blue);
+  --grid-line: var(--border-width) solid var(--color-line);
+
+  /* type scale + tracking */
+  --fs-hero: clamp(48px, 7vw, 84px);
+  --fs-h1: 40px;
+  --fs-h2: 28px;
+  --fs-h3: 20px;
+  --fs-body: 16px;
+  --fs-sm: 14px;
+  --fs-caps: 12px;
+  --track-caps: 0.12em;
+  --leading-tight: 1.03;
+  --leading-body: 1.6;
+
+  /* effects */
+  --shadow-card: none;
+
+  /* play stage */
+  --stage-width: min(420px, 100%);
+  --stage-aspect: 1 / 2;
+  /* The board is 1:2, so a stage that is as wide as it may be is 840px tall. */
+  --stage-max-height: 840px;
+  /* The board keeps this height even when the viewport is too short for it. */
+  --stage-min-height: 240px;
+
+  /* components */
+  --icon-box: 40px;
+  --nav-lift: 24px;
+  /* The nav's border-box height: its 40px mark plus padding and border. */
+  --nav-height: 72px;
+  /* Room the floating nav needs above whatever it floats over. */
+  --nav-clearance: calc(var(--nav-height) + var(--nav-lift));
+  --layer-nav: 20;
+  --layer-overlay: 40;
+
+  /* motion */
+  --marquee-duration: 26s;
+  --transition: 160ms;
+  --motion-fast: 90ms;
+  --motion-med: 300ms;
+  --ease: cubic-bezier(0.22, 0.61, 0.36, 1);
+  --ease-soft: var(--ease);
+
+  /* scroll fade — a section dims and shifts as it leaves the viewport */
+  /* How long a section takes to fade in or out. */
+  --fade-duration: 320ms;
+  /* How far a dimmed section sits from its place. */
+  --fade-shift: 24px;
+  /* The opacity a section drops to while it is out of the spotlight. */
+  --fade-dim: 0.15;
+  /* The board has to stay readable, so its section never drops below this. */
+  --fade-dim-play: 0.6;
+
+  /* page-load intro — the whole sequence stays well under 1.2s */
+  /* How long the reveal waits for the display font before it measures lines. */
+  --intro-font-wait: 120ms;
+  /* Headroom between scheduling the animations and their first frame. */
+  --intro-lead: 40ms;
+  --intro-nav-duration: 240ms;
+  --intro-line-duration: 240ms;
+  --intro-line-base-delay: 120ms;
+  --intro-line-stagger: 60ms;
+  --intro-tail-duration: 200ms;
+
+  /* hero typewriter — the eyebrow types once, the lede cycles forever */
+  /* Per-character delays for typing and deleting. */
+  --type-type: 45ms;
+  --type-delete: 25ms;
+  /* How long a finished lede line rests before it is deleted. */
+  --type-pause: 2500ms;
+  /* One full on/off cycle of the blinking caret. */
+  --type-caret-blink: 700ms;
+  /* The caret's fade-out once the eyebrow is finished. */
+  --type-caret-fade: 200ms;
+
+  /* section typewriter — a section's headings type themselves in whenever the
+     section takes the spotlight, and are wiped when it leaves again. */
+  /* How long one character takes to land. */
+  --type-section-type: 35ms;
+
+  /* landing feedback — what a hard drop does to the board */
+  /* How long the landed cells flash from the piece tone to the light tone. */
+  --land-flash: 120ms;
+  /* How long the landing particles live before they are gone. */
+  --land-particles: 400ms;
+  /* How long the board shakes after a long drop. */
+  --land-shake: 120ms;
+}

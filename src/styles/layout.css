@@ -1,0 +1,164 @@
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  padding: 0;
+}
+
+/* Anchor jumps glide to their target, unless the user asked for less motion. */
+@media (prefers-reduced-motion: no-preference) {
+  html {
+    scroll-behavior: smooth;
+  }
+}
+
+body {
+  min-height: 100vh;
+  background-color: var(--color-page-bg);
+  background-image:
+    linear-gradient(to right, var(--color-blueprint) var(--border-width), transparent var(--border-width)),
+    linear-gradient(to bottom, var(--color-blueprint) var(--border-width), transparent var(--border-width));
+  background-size: var(--blueprint-cell) var(--blueprint-cell);
+  font-family: var(--font-body);
+  font-size: var(--fs-body);
+  line-height: var(--leading-body);
+  color: var(--color-ink);
+  -webkit-font-smoothing: antialiased;
+}
+
+.page {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  overflow-x: clip;
+}
+
+.container {
+  width: 100%;
+  max-width: var(--container-max);
+  margin-inline: auto;
+  padding-inline: var(--space-6);
+}
+
+.section {
+  padding-block: var(--space-16);
+  /* Anchor targets land below the floating nav. */
+  scroll-margin-top: var(--nav-height);
+}
+
+.section--tight {
+  padding-block: var(--space-12);
+}
+
+.section--flush {
+  padding-block: 0;
+}
+
+.stack {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-8);
+}
+
+.cluster {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-4);
+}
+
+.nav {
+  position: sticky;
+  top: var(--nav-lift);
+  z-index: var(--layer-nav);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-4);
+  min-height: var(--nav-height);
+  padding: var(--space-3) var(--space-4);
+  background-color: var(--color-card);
+  border: var(--card-border);
+  border-radius: var(--radius-pill);
+}
+
+.hero {
+  display: grid;
+  align-items: center;
+  gap: var(--space-12);
+  grid-template-columns: minmax(0, 1fr);
+}
+
+/* The game lives in its own full-height section, so the board always has a
+   screen to itself. The top padding clears the floating nav, and the stage
+   takes whatever height is left, which keeps the board inside the viewport
+   on a short desktop window and on a phone. */
+.play {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-4);
+  min-height: 100svh;
+  padding-top: var(--nav-clearance);
+  /* The extra lift keeps the bar off the bottom edge when the section is
+     jumped to, because the jump lands the section below the nav. */
+  padding-bottom: calc(var(--space-6) + var(--nav-lift));
+  /* Jumping to the game lands it right under the floating nav. */
+  scroll-margin-top: var(--nav-lift);
+}
+
+.play .phase-stage {
+  /* A zero basis keeps the canvas's own size out of the section's height, so
+     the board always ends up exactly as tall as the space left for it. */
+  flex: 1 1 0;
+  width: auto;
+  min-height: var(--stage-min-height);
+  max-width: var(--stage-width);
+  max-height: var(--stage-max-height);
+  aspect-ratio: var(--stage-aspect);
+  margin: 0;
+}
+
+.marquee {
+  overflow: hidden;
+  padding-block: var(--space-4);
+}
+
+.marquee__track {
+  display: flex;
+  align-items: center;
+  gap: var(--space-8);
+  width: max-content;
+  animation: marquee-slide var(--marquee-duration) linear infinite;
+}
+
+.marquee:hover .marquee__track {
+  animation-play-state: paused;
+}
+
+@keyframes marquee-slide {
+  from {
+    transform: translateX(0);
+  }
+
+  to {
+    transform: translateX(-50%);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .marquee__track {
+    animation: none;
+  }
+}
+
+@media (max-width: 25rem) {
+  .nav .nav__links {
+    display: none;
+  }
+}
