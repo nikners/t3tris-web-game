@@ -1,19 +1,49 @@
-import type { IconName } from './icons';
-import { icon } from './icons';
+import {
+  hardDropIcon,
+  holdIcon,
+  inspectIcon,
+  moveIcon,
+  resetViewIcon,
+  restartIcon,
+  rotateCcwIcon,
+  rotateCwIcon,
+  undoIcon,
+  soundIcon,
+  viewSnapIcon,
+  patternsIcon,
+} from './icons';
 import { createSectionTypewriter } from './typewriter';
 
 const EYEBROW = 'HOW TO PLAY';
 const HEADLINE = 'No timers, just placement';
 
-const BINDINGS: Array<{ key: string; action: string }> = [
-  { key: '← / A', action: 'Move left' },
-  { key: '→ / D', action: 'Move right' },
-  { key: '↑ / W', action: 'Rotate clockwise' },
-  { key: '↓ / S', action: 'Rotate counter-clockwise' },
-  { key: 'Space / Enter', action: 'Hard drop' },
-  { key: 'R', action: 'Restart game' },
-  { key: 'Tab / Esc', action: 'Toggle inspect mode' },
-  { key: '0', action: 'Reset piece view' },
+interface Binding {
+  /** The key label, shown as a keycap. */
+  key: string;
+  /** What the key does. */
+  action: string;
+  /** The icon that stands for the action. */
+  icon: () => SVGSVGElement;
+}
+
+const BINDINGS: Binding[] = [
+  { key: '← / A', action: 'Move left', icon: moveIcon },
+  { key: '→ / D', action: 'Move right', icon: moveIcon },
+  { key: '↑ / W', action: 'Rotate clockwise', icon: rotateCwIcon },
+  { key: '↓ / S', action: 'Rotate counter-clockwise', icon: rotateCcwIcon },
+  { key: 'Space / Enter', action: 'Hard drop', icon: hardDropIcon },
+  { key: 'C / Shift', action: 'Hold piece', icon: holdIcon },
+  { key: 'U', action: 'Undo last drop', icon: undoIcon },
+  { key: 'R', action: 'Restart game', icon: restartIcon },
+  { key: 'Tab / Esc', action: 'Toggle inspect mode', icon: inspectIcon },
+  { key: '0', action: 'Reset piece view', icon: resetViewIcon },
+  {
+    key: '1 / 2 / 3 / 4',
+    action: 'Snap view: front / top / side / iso',
+    icon: viewSnapIcon,
+  },
+  { key: 'P', action: 'Toggle patterns', icon: patternsIcon },
+  { key: 'M', action: 'Toggle sound', icon: soundIcon },
 ];
 
 export function createHowToPlay(): HTMLElement {
@@ -32,7 +62,7 @@ export function createHowToPlay(): HTMLElement {
   const intro = document.createElement('p');
   intro.className = 'lede';
   intro.textContent =
-    'Spawn a piece, then take your time. Nothing falls on a clock. Move and rotate until the ghost outline sits where you want it, hard drop to lock, then clear lines and take the next piece.';
+    'In T3TRIS, spawn a piece, then take your time. Nothing falls on a clock. Move and rotate until the ghost outline sits where you want it, hard drop to lock, then clear lines and take the next piece.';
 
   const list = document.createElement('ol');
   list.className = 'steps';
@@ -41,14 +71,21 @@ export function createHowToPlay(): HTMLElement {
     const item = document.createElement('li');
     item.className = 'steps__item';
 
+    // The key itself, as a keycap next to the action.
     const keyEl = document.createElement('span');
-    keyEl.className = 'steps__key';
+    keyEl.className = 'keycap';
     keyEl.textContent = binding.key;
 
     const text = document.createElement('p');
+    text.className = 'steps__action';
     text.textContent = binding.action;
 
-    item.append(buildIconBox(keyIcon(binding.key)), keyEl, text);
+    // The icon sits at the far end of the row.
+    const box = document.createElement('span');
+    box.className = 'icon-box';
+    box.append(binding.icon());
+
+    item.append(keyEl, text, box);
     list.append(item);
   }
 
@@ -62,20 +99,4 @@ export function createHowToPlay(): HTMLElement {
   ]);
 
   return section;
-}
-
-function keyIcon(key: string): IconName {
-  if (key === 'Space / Enter') return 'drop';
-  if (key === 'R') return 'drop';
-  if (key === 'Tab / Esc') return 'inspect';
-  if (key === '0') return 'rotate';
-  if (key === '↑ / W' || key === '↓ / S') return 'rotate';
-  return 'move';
-}
-
-function buildIconBox(glyph: IconName): HTMLElement {
-  const box = document.createElement('span');
-  box.className = 'icon-box icon-box--ink';
-  box.append(icon(glyph));
-  return box;
 }

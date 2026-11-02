@@ -74,6 +74,43 @@ export function rotateMatrix(shape: Matrix, dir: 1 | -1): Matrix {
   return rotated;
 }
 
+/**
+ * Cuts the empty rows and columns off a shape, so a piece can be drawn in
+ * the space it actually takes up.
+ */
+export function trimShape(shape: Matrix): Matrix {
+  let top = shape.length;
+  let bottom = -1;
+  let left = shape[0].length;
+  let right = -1;
+
+  shape.forEach((row, y) => {
+    row.forEach((cell, x) => {
+      if (cell === '.') {
+        return;
+      }
+
+      top = Math.min(top, y);
+      bottom = Math.max(bottom, y);
+      left = Math.min(left, x);
+      right = Math.max(right, x);
+    });
+  });
+
+  // An empty shape stays empty.
+  if (bottom === -1) {
+    return [];
+  }
+
+  const trimmed: Matrix = [];
+
+  for (let y = top; y <= bottom; y++) {
+    trimmed.push(shape[y].slice(left, right + 1));
+  }
+
+  return trimmed;
+}
+
 export function filledCellCount(shape: Matrix): number {
   let count = 0;
 

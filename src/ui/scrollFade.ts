@@ -29,9 +29,9 @@ const PLAY_DIM_TOKEN = '--fade-dim-play';
 const REDUCED_MOTION_QUERY = '(prefers-reduced-motion: reduce)';
 
 /** Fired on a section when it takes the spotlight. */
-export const SECTION_ACTIVE_EVENT = 'broccolis:section-active';
+export const SECTION_ACTIVE_EVENT = 't3tris:section-active';
 /** Fired on a section when it hands the spotlight over. */
-export const SECTION_INACTIVE_EVENT = 'broccolis:section-inactive';
+export const SECTION_INACTIVE_EVENT = 't3tris:section-inactive';
 
 type Direction = 'down' | 'up';
 

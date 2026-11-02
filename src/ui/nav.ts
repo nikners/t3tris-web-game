@@ -1,4 +1,4 @@
-import { icon } from './icons';
+import { createLogoMark } from './logo';
 
 export function createNav(): HTMLElement {
   const nav = document.createElement('nav');
@@ -7,12 +7,13 @@ export function createNav(): HTMLElement {
   const brand = document.createElement('a');
   brand.className = 'nav__brand';
   brand.href = '#top';
+  brand.setAttribute('aria-label', 'T3TRIS home');
 
-  const mark = icon('logo');
+  const mark = createLogoMark();
   mark.classList.add('nav__mark');
   const word = document.createElement('span');
   word.className = 'nav__word';
-  word.textContent = 'Broccolis';
+  word.textContent = 'T3TRIS';
   brand.append(mark, word);
 
   const links = document.createElement('div');

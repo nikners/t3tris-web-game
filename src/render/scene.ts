@@ -4,7 +4,7 @@ import { TONE_TOKEN } from '../logic/pieces';
 import type { Matrix, TetrominoType } from '../logic/pieces';
 import type { GameState } from '../logic/game';
 import { BoardView } from './boardView';
-import { PieceMesh } from './pieceMesh';
+import { PieceMesh, type ViewSnap } from './pieceMesh';
 import { LandingFx } from './landingFx';
 import type { LandingCell } from './landingFx';
 
@@ -16,6 +16,8 @@ export interface ThemeContext {
   tones: Record<TetrominoType, string>;
   /** Block edge outline color per tone: ink for light tones, a lighter token for dark ones. */
   edges: Record<TetrominoType, string>;
+  mark: string;
+  markDark: string;
 }
 
 export interface Scene {
@@ -25,6 +27,7 @@ export interface Scene {
   refreshTheme(): void;
   setInspecting(on: boolean): void;
   resetView(): void;
+  snapView(snap: ViewSnap): void;
   applyTilt(dx: number, dy: number): void;
   applyZoom(delta: number): void;
   isInspecting(): boolean;
@@ -73,6 +76,8 @@ export function readThemeTokens(): ThemeContext {
     light: read('--color-white'),
     tones,
     edges,
+    mark: read('--color-mark'),
+    markDark: read('--color-mark-dark'),
   };
 }
 
@@ -265,6 +270,15 @@ export function createScene(container: HTMLElement): Scene {
     landingFx.play(cells, previous.active.type, landingY - previous.active.y);
   }
 
+  // An undo puts the last drop back: the board loses the locked cells and
+  // the piece that was on it comes back to where it was. The drop, clear and
+  // landing feedback would read that as a fresh drop, so it is skipped. The
+  // undo count is the signal for it: it only goes down when a turn is taken
+  // back, and a restart fills it up again.
+  function isUndo(previous: GameState, state: GameState): boolean {
+    return state.undosLeft < previous.undosLeft;
+  }
+
   // The board canvas nudges two pixels and stops. Only the canvas moves, so
   // the page around it never shifts.
   function shake(): void {
@@ -314,9 +328,12 @@ export function createScene(container: HTMLElement): Scene {
 
   return {
     sync(state) {
-      detectDrop(state);
-      detectClear(state);
-      detectLanding(state);
+      if (!latest || !isUndo(latest, state)) {
+        detectDrop(state);
+        detectClear(state);
+        detectLanding(state);
+      }
+
       latest = state;
       syncToState(state);
       renderer.render(scene, camera);
@@ -343,6 +360,10 @@ export function createScene(container: HTMLElement): Scene {
 
     resetView() {
       piece.resetView();
+    },
+
+    snapView(snap) {
+      piece.snapView(snap);
     },
 
     applyTilt(dx, dy) {

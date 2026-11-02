@@ -12,6 +12,9 @@
   --color-muted: #5a5a6a;
   --color-blueprint: rgba(30, 0, 246, 0.1);
   --blueprint-cell: 32px;
+  /* Colorblind patterns: markings drawn on pieces and locked blocks */
+  --color-mark: #ffffff;
+  --color-mark-dark: #212121;
 
   /* tetromino tones - all distinct on the white board base */
   --tone-i: #ff622a;
@@ -73,6 +76,14 @@
 
   /* components */
   --icon-box: 40px;
+  /* An icon that sits inline with text, inside a button or a label. */
+  --icon-inline: 18px;
+  /* The next-pieces card: the size of one square of a mini piece. */
+  --mini-cell-lg: 20px;
+  --mini-cell-sm: 12px;
+  --mini-gap: 2px;
+  /* How wide the card's body is, so the card keeps the same width. */
+  --next-card-width: 92px;
   --nav-lift: 24px;
   /* The nav's border-box height: its 40px mark plus padding and border. */
   --nav-height: 72px;
@@ -86,6 +97,9 @@
   --transition: 160ms;
   --motion-fast: 90ms;
   --motion-med: 300ms;
+  /* How long the inspect view takes to ease to a preset snap (keys 1-4) or
+     back to the default pose (key 0 / leaving inspect mode). */
+  --inspect-snap: 200ms;
   --ease: cubic-bezier(0.22, 0.61, 0.36, 1);
   --ease-soft: var(--ease);
 

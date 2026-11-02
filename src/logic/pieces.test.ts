@@ -1,4 +1,12 @@
-import { baseShape, createBag, filledCellCount, PIECE_TYPES, rotateMatrix, TONE_TOKEN } from './pieces';
+import {
+  baseShape,
+  createBag,
+  filledCellCount,
+  PIECE_TYPES,
+  rotateMatrix,
+  TONE_TOKEN,
+  trimShape,
+} from './pieces';
 import type { Cell } from './pieces';
 import { describe, expect, it } from 'vitest';
 
@@ -89,5 +97,31 @@ describe('pieces', () => {
 
   it('shuffles differently for different randomness', () => {
     expect(createBag(() => 0)).not.toEqual(createBag(() => 0.5));
+  });
+
+  it('cuts the empty rows and columns off a shape', () => {
+    expect(trimShape(baseShape('I'))).toEqual([['I', 'I', 'I', 'I']]);
+    expect(trimShape(baseShape('T'))).toEqual([
+      ['.', 'T', '.'],
+      ['T', 'T', 'T'],
+    ]);
+    expect(trimShape(baseShape('O'))).toEqual([
+      ['O', 'O'],
+      ['O', 'O'],
+    ]);
+  });
+
+  it('keeps every filled cell when trimming', () => {
+    for (const type of PIECE_TYPES) {
+      const shape = baseShape(type);
+      const trimmed = trimShape(shape);
+
+      expect(filledCellCount(trimmed)).toBe(filledCellCount(shape));
+      expect(trimmed.flat().filter((cell) => cell !== '.')).toContain(type);
+    }
+  });
+
+  it('trims an empty shape to nothing', () => {
+    expect(trimShape([['.', '.'], ['.', '.']])).toEqual([]);
   });
 });

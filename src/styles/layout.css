@@ -112,16 +112,70 @@ body {
   scroll-margin-top: var(--nav-lift);
 }
 
-.play .phase-stage {
+/* The board and the next-pieces card share a row. The row takes the space
+   the board used to have, so the board keeps its size. */
+.play__board {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-4);
+  width: 100%;
   /* A zero basis keeps the canvas's own size out of the section's height, so
      the board always ends up exactly as tall as the space left for it. */
   flex: 1 1 0;
+  min-height: var(--stage-min-height);
+}
+
+/* The hold and next cards stand together, next to the board. */
+.play__cards {
+  display: flex;
+  align-items: stretch;
+  gap: var(--space-4);
+  flex: none;
+}
+
+.play .phase-stage {
+  /* The row decides how tall the board is; the board keeps its 1:2 shape. */
+  flex: 0 0 auto;
+  align-self: stretch;
   width: auto;
+  height: auto;
   min-height: var(--stage-min-height);
   max-width: var(--stage-width);
   max-height: var(--stage-max-height);
   aspect-ratio: var(--stage-aspect);
   margin: 0;
+}
+
+/* On a phone the card sits above the board in a compact row, so neither of
+   them runs off the side. */
+@media (max-width: 30rem) {
+  .play__board {
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-start;
+    gap: var(--space-3);
+    /* The row is as tall as the card and the board together, so the board
+       keeps its full width and the page scrolls instead of the two of them
+       spilling over the heading and the bar. */
+    flex: 0 0 auto;
+  }
+
+  .play .phase-stage {
+    /* The board takes its height from its width instead of the row. */
+    align-self: auto;
+    width: 100%;
+    height: auto;
+  }
+
+  /* On a phone the cards sit above the board, one under the other, so
+     neither of them runs off the side. */
+  .play__cards {
+    order: -1;
+    width: 100%;
+    flex-direction: column;
+    align-items: stretch;
+  }
 }
 
 .marquee {

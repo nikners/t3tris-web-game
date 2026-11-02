@@ -1,15 +1,18 @@
 import type { Game } from '../logic/game';
 import type { GameState } from '../logic/game';
+import type { BestScore } from './bestScore';
 
-export function createCounters(game: Game): HTMLElement {
+export function createCounters(game: Game, best: BestScore): HTMLElement {
   const root = document.createElement('div');
   root.className = 'counters';
 
   const score = item('SCORE');
+  const record = item('BEST');
   const lines = item('LINES');
   const level = item('LEVEL');
 
-  root.append(score.label, score.value, lines.label, lines.value, level.label, level.value);
+  // The four items are appended by item() below, each one holding its label
+  // above its value.
 
   function pop(value: HTMLSpanElement, text: string): void {
     if (value.textContent === text) {
@@ -26,11 +29,14 @@ export function createCounters(game: Game): HTMLElement {
 
   function render(state: GameState): void {
     pop(score.value, String(state.score).padStart(6, '0'));
+    pop(record.value, String(best.value()).padStart(6, '0'));
     pop(lines.value, String(state.lines).padStart(2, '0'));
     pop(level.value, String(state.level));
   }
 
   game.subscribe(render);
+  // A finished game can change the best, which the counter shows too.
+  best.subscribe(() => render(game.getState()));
   render(game.getState());
   return root;
 

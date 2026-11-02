@@ -1,5 +1,8 @@
 import type { Scene } from '../render/scene';
+import type { ViewSnap } from '../render/pieceMesh';
 import type { Game } from '../logic/game';
+import type { SoundToggle } from '../ui/soundToggle';
+import * as patterns from '../ui/patterns';
 
 export interface ControlsOptions {
   surface: HTMLElement;
@@ -7,13 +10,18 @@ export interface ControlsOptions {
   scene: Scene;
   owner?: Pick<Window, 'addEventListener' | 'removeEventListener'>;
   inspectToggle?: HTMLElement;
+  soundToggle?: SoundToggle;
   /**
    * Whether the board is on screen. While it is not, the page keeps its own
    * keyboard behaviour and scrolls normally.
    */
   isInView?: () => boolean;
+  /**
+   * Reports inspect mode changes, so the UI around the board (the view-snap
+   * buttons) can show itself only while inspecting.
+   */
+  onInspectChange?: (on: boolean) => void;
 }
-
 export interface Controls {
   dispose(): void;
   isInspecting(): boolean;
@@ -29,11 +37,32 @@ const ROTATE_CCW = new Set(['ArrowDown', 'KeyS']);
 
 const HARD_DROP = new Set(['Space', 'Enter']);
 
+const HOLD = new Set(['KeyC', 'ShiftLeft', 'ShiftRight']);
+
+const UNDO = new Set(['KeyU']);
+
+const SOUND = new Set(['KeyM']);
+
+const PATTERNS = new Set(['KeyP']);
+
 const RESET_GAME = new Set(['KeyR']);
 
 const TOGGLE_INSPECT = new Set(['Tab', 'Escape']);
 
 const RESET_VIEW = new Set(['Digit0', 'Numpad0']);
+
+// The inspect view snaps: keys 1-4 while inspect mode is on. Outside
+// inspect mode the digits are not ours, so they are looked up but ignored.
+const VIEW_SNAPS: Record<string, ViewSnap> = {
+  Digit1: 'FRONT',
+  Digit2: 'TOP',
+  Digit3: 'SIDE',
+  Digit4: 'ISO',
+  Numpad1: 'FRONT',
+  Numpad2: 'TOP',
+  Numpad3: 'SIDE',
+  Numpad4: 'ISO',
+};
 
 const INTERACTIVE_TAGS = ['BUTTON', 'A', 'INPUT', 'TEXTAREA', 'SELECT', 'SUMMARY'];
 
@@ -49,7 +78,7 @@ function isTextEntry(target: EventTarget | null): boolean {
 }
 
 export function createControls(options: ControlsOptions): Controls {
-  const { surface, game, scene, owner = window, inspectToggle } = options;
+  const { surface, game, scene, owner = window, inspectToggle, soundToggle } = options;
   const isInView = options.isInView ?? (() => true);
 
   let inspecting = false;
@@ -59,6 +88,7 @@ export function createControls(options: ControlsOptions): Controls {
     inspecting = next;
     scene.setInspecting(next);
     inspectToggle?.setAttribute('aria-pressed', String(next));
+    options.onInspectChange?.(next);
   }
 
   function toggleInspect(): void {
@@ -124,7 +154,7 @@ export function createControls(options: ControlsOptions): Controls {
 
     // Inspect toggles stay available during the drop animation; only piece
     // actions are frozen until the slide/squash finishes.
-    if (scene.isDropping() && !HARD_DROP.has(code) && !TOGGLE_INSPECT.has(code) && !RESET_VIEW.has(code)) {
+    if (scene.isDropping() && !HARD_DROP.has(code) && !TOGGLE_INSPECT.has(code) && !RESET_VIEW.has(code) && !SOUND.has(code) && !PATTERNS.has(code)) {
       return;
     }
 
@@ -165,6 +195,40 @@ export function createControls(options: ControlsOptions): Controls {
       return;
     }
 
+    // Holding puts the piece aside. It is a piece action, so it waits for
+    // the drop animation just like the other ones. Only the letter key is
+    // prevented: Shift on its own scrolls nothing, and it must not take
+    // Shift+Tab away from the focus.
+    if (HOLD.has(code)) {
+      if (code === 'KeyC') {
+        event.preventDefault();
+      }
+
+      game.hold();
+      return;
+    }
+
+    // Undo takes the last drop back. It is a piece action, so it waits for
+    // the drop animation just like the other ones. The key scrolls nothing,
+    // but it is held down all the same.
+    if (UNDO.has(code)) {
+      event.preventDefault();
+      game.undo();
+      return;
+    }
+
+    if (SOUND.has(code)) {
+      event.preventDefault();
+      soundToggle?.element.click();
+      return;
+    }
+
+    if (PATTERNS.has(code)) {
+      event.preventDefault();
+      patterns.toggle();
+      return;
+    }
+
     if (RESET_GAME.has(code)) {
       event.preventDefault();
       game.reset();
@@ -180,6 +244,16 @@ export function createControls(options: ControlsOptions): Controls {
     if (RESET_VIEW.has(code)) {
       event.preventDefault();
       scene.resetView();
+      return;
+    }
+
+    // The view snaps only apply while inspecting; outside inspect mode the
+    // digit keys are left entirely alone (no preventDefault, no effect).
+    const snap = VIEW_SNAPS[code];
+
+    if (snap !== undefined && inspecting) {
+      event.preventDefault();
+      scene.snapView(snap);
     }
   }
 
@@ -194,6 +268,9 @@ export function createControls(options: ControlsOptions): Controls {
   surface.addEventListener('wheel', onWheel, { passive: false });
   owner.addEventListener('keydown', onKeyDown);
   inspectToggle?.addEventListener('click', onToggleClick);
+  soundToggle?.element.addEventListener('click', () => {
+    soundToggle?.element.blur();
+  });
 
   function dispose(): void {
     surface.removeEventListener('pointerdown', onPointerDown);
@@ -203,6 +280,7 @@ export function createControls(options: ControlsOptions): Controls {
     surface.removeEventListener('wheel', onWheel);
     owner.removeEventListener('keydown', onKeyDown);
     inspectToggle?.removeEventListener('click', onToggleClick);
+    soundToggle?.element.removeEventListener('click', () => {});
     dragging = null;
   }
 

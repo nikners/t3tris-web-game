@@ -1,4 +1,4 @@
-import { icon } from './icons';
+import { starIcon } from './icons';
 
 const BANDS: Array<['ink' | 'blue', string]> = [
   ['ink', 'MOVE · ROTATE · INSPECT · HARD DROP'],
@@ -38,7 +38,7 @@ function buildBand(tone: 'ink' | 'blue', text: string): HTMLElement {
 }
 
 function buildStar(): SVGSVGElement {
-  const star = icon('star');
+  const star = starIcon();
   star.classList.add('band__star');
   return star;
 }

@@ -3,3 +3,5 @@ dist
 *.local
 .dev
 .DS_Store
+screenshots/
+.cloud-attachments/

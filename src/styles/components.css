@@ -91,6 +91,165 @@
   color: var(--color-ink);
 }
 
+/* The next-pieces card: the three pieces that are coming, drawn with plain
+   squares so the board keeps its single canvas. */
+.next-card {
+  flex: none;
+}
+
+.next-card__body {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-4);
+  min-width: var(--next-card-width);
+}
+
+.next-card__slot {
+  --mini-cell: var(--mini-cell-sm);
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* The piece that spawns next gets the big one. */
+.next-card__slot--first {
+  --mini-cell: var(--mini-cell-lg);
+}
+
+.mini-piece {
+  display: grid;
+  grid-template-columns: repeat(var(--mini-cols), var(--mini-cell));
+  grid-template-rows: repeat(var(--mini-rows), var(--mini-cell));
+  gap: var(--mini-gap);
+  transition: opacity var(--transition) var(--ease-soft);
+}
+
+.mini-piece__cell {
+  border-radius: var(--radius-sm);
+}
+
+.mini-piece__cell--on {
+  background-color: var(--mini-tone);
+  /* The same edge the board draws: ink on the light tones, the line colour
+     on the dark ones. */
+  box-shadow: inset 0 0 0 1px var(--mini-edge);
+}
+
+.mini-piece--i {
+  --mini-tone: var(--tone-i);
+  --mini-edge: var(--color-ink);
+}
+
+.mini-piece--j {
+  --mini-tone: var(--tone-j);
+  --mini-edge: var(--color-line);
+}
+
+.mini-piece--l {
+  --mini-tone: var(--tone-l);
+  --mini-edge: var(--color-ink);
+}
+
+.mini-piece--o {
+  --mini-tone: var(--tone-o);
+  --mini-edge: var(--color-ink);
+}
+
+.mini-piece--s {
+  --mini-tone: var(--tone-s);
+  --mini-edge: var(--color-line);
+}
+
+.mini-piece--t {
+  --mini-tone: var(--tone-t);
+  --mini-edge: var(--color-line);
+}
+
+.mini-piece--z {
+  --mini-tone: var(--tone-z);
+  --mini-edge: var(--color-ink);
+}
+
+/* On a phone the card sits above the board, so the three pieces line up in
+   a row and the card stays short. */
+@media (max-width: 30rem) {
+  .next-card__body {
+    flex-direction: row;
+    justify-content: center;
+    gap: var(--space-6);
+  }
+}
+
+/* The hold card: the piece that is put aside. */
+.hold-card {
+  flex: none;
+}
+
+.hold-card__body {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-width: var(--next-card-width);
+}
+
+.hold-card__slot {
+  --mini-cell: var(--mini-cell-lg);
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  /* The slot keeps its size whether a piece is in it or not. */
+  min-width: calc(var(--mini-cell-lg) * 4 + var(--mini-gap) * 3);
+  min-height: calc(var(--mini-cell-lg) * 2 + var(--mini-gap));
+}
+
+/* Nothing is held yet, so the slot is empty. */
+.hold-card__slot--empty {
+  border: var(--border-width) dashed var(--color-line);
+  border-radius: var(--radius-sm);
+}
+
+/* The hold is locked for the piece on the board, so the held piece is
+   dimmed: it is there, but it cannot be used yet. */
+.hold-card--locked .mini-piece {
+  opacity: 0.35;
+}
+
+/* The row of keycaps under the board: the keys that drive it. */
+.play__keys {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-3) var(--space-6);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.play__key {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.play__key-action {
+  font-family: var(--font-display);
+  font-size: var(--fs-caps);
+  letter-spacing: var(--track-caps);
+  text-transform: uppercase;
+  color: var(--color-muted);
+}
+
+/* An icon that sits inline with text, inside a button. */
+.cta > svg {
+  flex: none;
+  width: var(--icon-inline);
+  height: var(--icon-inline);
+}
+
 .nav__brand {
   display: flex;
   align-items: center;
@@ -101,7 +260,15 @@
   display: block;
   width: var(--icon-box);
   height: var(--icon-box);
-  color: var(--color-blue);
+}
+
+/* The logo mark: four blocks in a T, in the brand blue and orange. */
+.logo__block--blue {
+  fill: var(--color-blue);
+}
+
+.logo__block--orange {
+  fill: var(--color-orange);
 }
 
 .nav__word {
@@ -164,6 +331,29 @@
 
 .cta:active {
   transform: translateY(0);
+}
+
+/* The number of undos that are left on the undo button. */
+.undo__count {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 1.6em;
+  padding-inline: var(--space-1);
+  border-radius: var(--radius-sm);
+  background-color: color-mix(in srgb, var(--color-ink) 22%, transparent);
+  font-size: var(--fs-caps);
+}
+
+/* A button with nothing left to do sits out. */
+.cta:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.cta:disabled:hover {
+  background-color: var(--color-orange);
+  transform: none;
 }
 
 .phase-button {
@@ -313,24 +503,46 @@
 
 .steps__item {
   display: flex;
-  align-items: flex-start;
+  align-items: center;
   gap: var(--space-4);
 }
 
 .steps__item::before {
   counter-increment: step;
   content: counter(step, decimal-leading-zero);
+  flex: none;
   font-family: var(--font-display);
   font-size: var(--fs-h3);
   color: var(--color-blue);
 }
 
-.steps__key {
+/* The action the key does, between the keycap and the icon. */
+.steps__action {
+  flex: 1 1 auto;
+  margin: 0;
+}
+
+/* The icon is pushed to the far end of the row. */
+.steps__item .icon-box {
+  margin-left: auto;
+}
+
+/* A keycap pill: the key label next to the action it does. */
+.keycap {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex: none;
+  padding: var(--space-1) var(--space-3);
+  background-color: var(--color-card);
+  border: var(--grid-line);
+  border-radius: var(--radius-sm);
   font-family: var(--font-display);
   font-size: var(--fs-caps);
   letter-spacing: var(--track-caps);
   text-transform: uppercase;
   color: var(--color-ink);
+  white-space: nowrap;
 }
 
 .faq__item {
@@ -386,16 +598,51 @@
   gap: var(--space-6);
 }
 
+/* The view-snap row: four small buttons plus the piece name. It only has a
+   display while inspect mode is on — otherwise the hidden attribute hides
+   it. */
+.snap-row:not([hidden]) {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+/* Each snap button is dressed like a keycap, so the row reads as part of
+   the board's key hints. Colours come from tokens only. */
+.snap-row__btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 2rem;
+  padding: var(--space-1) var(--space-2);
+  background-color: var(--color-card);
+  border: var(--grid-line);
+  border-radius: var(--radius-sm);
+  font-family: var(--font-display);
+  font-size: var(--fs-caps);
+  letter-spacing: var(--track-caps);
+  color: var(--color-ink);
+  cursor: pointer;
+}
+
+.snap-row__btn:hover {
+  background-color: var(--color-blueprint);
+}
+
+/* The piece under the lens, e.g. "T-PIECE", announced politely as it
+   changes. */
+.snap-row__piece {
+  font-family: var(--font-display);
+  font-size: var(--fs-caps);
+  letter-spacing: var(--track-caps);
+  text-transform: uppercase;
+  color: var(--color-muted);
+  white-space: nowrap;
+}
+
 /* The hero's call to action hugs its label instead of stretching the column. */
 .hero .stack > .cta {
   align-self: flex-start;
-}
-
-/* Keep SCORE/LINES/LEVEL on one line next to the narrow stage. */
-@media (max-width: 25rem) {
-  .counters {
-    gap: var(--space-4);
-  }
 }
 
 .counters__item {
@@ -416,6 +663,18 @@
   font-family: var(--font-display);
   font-size: var(--fs-h3);
   color: var(--color-ink);
+}
+
+/* Four counters do not fit on one line next to the narrow stage, so the
+   values step down a size and the row tightens up. */
+@media (max-width: 25rem) {
+  .counters {
+    gap: var(--space-3);
+  }
+
+  .counters__value {
+    font-size: var(--fs-body);
+  }
 }
 
 .counters__value--pop {
@@ -683,6 +942,11 @@ html.intro-armed .hero .lede {
   .board-canvas--shake {
     animation: none;
   }
+
+  /* The held piece fades between dim and bright, without the fade. */
+  .mini-piece {
+    transition: none;
+  }
 }
 
 .game-over__panel {
@@ -694,6 +958,24 @@ html.intro-armed .hero .lede {
   background-color: var(--color-card);
   border: var(--card-border);
   border-radius: var(--radius-card);
+}
+
+/* A small tag for a game that beat the best score. */
+.game-over__badge {
+  align-self: center;
+  padding-block: var(--space-1);
+  padding-inline: var(--space-3);
+  border-radius: var(--radius-pill);
+  background-color: var(--color-orange);
+  color: var(--color-white);
+  font-family: var(--font-display);
+  font-size: var(--fs-caps);
+  letter-spacing: var(--track-caps);
+  text-transform: uppercase;
+}
+
+.game-over__badge[hidden] {
+  display: none;
 }
 
 .game-over__title {
@@ -713,8 +995,15 @@ html.intro-armed .hero .lede {
 }
 
 .game-over__hint {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
   margin: 0;
   font-family: var(--font-body);
   font-size: var(--fs-sm);
   color: var(--color-muted);
+}
+
+.sound-toggle {
+  display: none;
 }

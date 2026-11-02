@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" role="img" aria-label="T3TRIS">
+  <!-- The favicon is a separate file, so it cannot read the page's tokens.
+       These two hex values mirror --color-blue and --color-orange. -->
+  <rect x="0.5" y="4.5" width="7" height="7" rx="0.75" fill="#1e00f6" />
+  <rect x="8.5" y="4.5" width="7" height="7" rx="0.75" fill="#1e00f6" />
+  <rect x="16.5" y="4.5" width="7" height="7" rx="0.75" fill="#1e00f6" />
+  <rect x="8.5" y="12.5" width="7" height="7" rx="0.75" fill="#ff622a" />
+</svg>

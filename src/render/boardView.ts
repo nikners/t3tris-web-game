@@ -2,6 +2,9 @@ import * as THREE from 'three';
 import { HEIGHT, WIDTH } from '../logic/board';
 import type { Board } from '../logic/board';
 import type { ThemeContext } from './scene';
+import type { TetrominoType } from '../logic/pieces';
+import { getPatternTexture } from './markers';
+import * as patterns from '../ui/patterns';
 
 // Line-clear feedback (render-only). Rows flash white→blue and fade over
 // CLEAR_FLASH_SECONDS, then the rows above the clears slide down, finishing
@@ -51,6 +54,8 @@ export class BoardView {
 
   private readonly theme: ThemeContext;
 
+  private stopPatterns?: () => void;
+
   constructor(theme: ThemeContext) {
     this.theme = theme;
 
@@ -79,6 +84,27 @@ export class BoardView {
         this.group.add(cell);
       }
     }
+
+    this.stopPatterns = patterns.subscribe(() => {
+      this.refreshPatterns();
+    });
+  }
+
+  private refreshPatterns(): void {
+    // Re-apply materials for all visible cells
+    for (let row = 0; row < HEIGHT; row++) {
+      for (let column = 0; column < WIDTH; column++) {
+        const cell = this.cells[row * WIDTH + column];
+        if (cell.visible) {
+          const material = this.toneFor((cell.userData?.value as string) || '.');
+          cell.material = material;
+          if (cell.children[0]) {
+            const outline = this.outlineFor((cell.userData?.value as string) || '.');
+            (cell.children[0] as THREE.LineSegments).material = outline;
+          }
+        }
+      }
+    }
   }
 
   update(board: Board): void {
@@ -87,6 +113,7 @@ export class BoardView {
         const cell = this.cells[row * WIDTH + column];
         const value = board[row][column];
 
+        cell.userData.value = value;
         cell.visible = value !== '.';
         cell.material = this.toneFor(value);
         cell.children[0].visible = cell.visible;
@@ -143,6 +170,9 @@ export class BoardView {
           opacity: 1,
           depthWrite: false,
         });
+        if (patterns.get()) {
+          material.map = getPatternTexture(value as TetrominoType, this.theme);
+        }
         const overlay = new THREE.Mesh(this.cellGeometry, material);
         overlay.rotation.x = -Math.PI / 2;
         overlay.position.set(columnToWorldX(column), 0.03, rowToWorldZ(row));
@@ -220,6 +250,7 @@ export class BoardView {
         }
 
         const value = state.settled[source][column];
+        cell.userData.value = value;
         cell.visible = value !== '.';
 
         if (value !== '.') {
@@ -255,17 +286,28 @@ export class BoardView {
     const tone = this.theme.tones[value as keyof ThemeContext['tones']];
     const color = tone ?? (value === EMPTY_TONE ? this.theme.boardBase : this.theme.boardLine);
 
-    let material = this.toneMaterials.get(color);
+    const key = `${value}|${patterns.get() ? 'p' : 'n'}`;
+    let material = this.toneMaterials.get(key);
 
     if (!material) {
       material = new THREE.MeshBasicMaterial({ color });
-      this.toneMaterials.set(color, material);
+      if (patterns.get() && value !== EMPTY_TONE && value !== '.') {
+        material.map = getPatternTexture(value as TetrominoType, this.theme);
+      }
+      this.toneMaterials.set(key, material);
+    } else if (patterns.get() && value !== EMPTY_TONE && value !== '.' && !material.map) {
+      material.map = getPatternTexture(value as TetrominoType, this.theme);
+      material.needsUpdate = true;
+    } else if (!patterns.get() && material.map) {
+      material.map = null;
+      material.needsUpdate = true;
     }
 
     return material;
   }
 
   dispose(): void {
+    this.stopPatterns?.();
     this.cellGeometry.dispose();
     this.grid.geometry.dispose();
     this.frame.geometry.dispose();

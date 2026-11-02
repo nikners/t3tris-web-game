@@ -3,6 +3,8 @@ import { HEIGHT, WIDTH } from '../logic/board';
 import type { Matrix } from '../logic/pieces';
 import type { TetrominoType } from '../logic/pieces';
 import type { ThemeContext } from './scene';
+import { getPatternTexture } from './markers';
+import * as patterns from '../ui/patterns';
 
 // Hard-drop animation: quick slide down to the landing spot, then a squash.
 // Render-only: logic has already locked the piece; this shows the motion.
@@ -28,12 +30,29 @@ const CELL_PLANE_Y = 0.01;
 const REST_HEIGHT = CELL_PLANE_Y + BLOCK_SIZE / 2;
 
 const HOVER_HEIGHT = 1.05;
-
 const GHOST_LIFT = 0.04;
-
 const DEFAULT_POSE: InspectPose = { tiltX: 0, tiltY: 0, zoom: 1 };
 
 const MAX_TILT = Math.PI / 3;
+
+/** The preset views for the inspect snaps (keys 1-4). */
+export type ViewSnap = 'FRONT' | 'TOP' | 'SIDE' | 'ISO';
+
+// The camera never moves, so a preset is just the pose that shows the piece
+// from that angle. Every value stays inside ±MAX_TILT (and at the default
+// zoom), so a drag after a snap keeps clamping smoothly from where the snap
+// left off instead of jumping.
+const SNAP_POSES: Record<ViewSnap, InspectPose> = {
+  // The default pose: the piece flat on the board, as the game shows it.
+  FRONT: DEFAULT_POSE,
+  // Tipped up so its face turns towards the overhead camera: read as looking
+  // straight down at it.
+  TOP: { tiltX: MAX_TILT, tiltY: 0, zoom: 1 },
+  // Spun around its vertical axis: the piece seen from the side.
+  SIDE: { tiltX: 0, tiltY: MAX_TILT, zoom: 1 },
+  // Half way between the two: the three-quarter view.
+  ISO: { tiltX: MAX_TILT * 0.5, tiltY: -MAX_TILT * 0.5, zoom: 1 },
+};
 
 const MIN_ZOOM = 0.5;
 
@@ -43,7 +62,30 @@ const TILT_PER_PIXEL = 0.0062;
 
 const ZOOM_PER_STEP = 0.16;
 
-const EASE_RATE = 8;
+// Fallback ease rate when the --inspect-snap token cannot be read: the old
+// fixed rate, kept so a missing token degrades to a gentle ease instead of a
+// jump.
+const EASE_RATE_FALLBACK = 8;
+
+let cachedEaseRate: number | null = null;
+
+// How fast the pose eases toward its target, derived from the duration
+// token: the blend covers ~99% of the distance by the end of --inspect-snap.
+// Key 0, leaving inspect mode and the preset snaps all travel through this
+// same blend in update(), so the timing lives here once.
+function easeRate(): number {
+  if (cachedEaseRate === null) {
+    const raw =
+      typeof document !== 'undefined'
+        ? getComputedStyle(document.documentElement).getPropertyValue('--inspect-snap')
+        : '';
+    const ms = Number.parseFloat(raw);
+    cachedEaseRate =
+      Number.isFinite(ms) && ms > 0 ? -Math.log(0.01) / (ms / 1000) : EASE_RATE_FALLBACK;
+  }
+
+  return cachedEaseRate;
+}
 
 const INSTANT_RATE = 400;
 
@@ -195,6 +237,8 @@ export class PieceMesh {
 
   private readonly dropRoot = new THREE.Group();
 
+  private stopPatterns?: () => void;
+
   constructor(theme: ThemeContext) {
     this.theme = theme;
 
@@ -229,10 +273,27 @@ export class PieceMesh {
     }
 
     this.group.add(this.pieceRoot, this.phantomRoot, this.dropRoot);
+
+    this.stopPatterns = patterns.subscribe(() => {
+      this.refreshPatterns();
+    });
+  }
+
+  private refreshPatterns(): void {
+    if (this.type) {
+      const material = this.materialFor(this.type);
+      const outline = this.outlineFor(this.type);
+      this.blocks.forEach((block) => {
+        if (block.visible) {
+          block.material = material;
+          (block.children[0] as THREE.LineSegments).material = outline;
+        }
+      });
+    }
   }
 
   // Plays the render-only hard-drop: copy of the piece slides from its prev
-  // position down to the landing row, then squashes. Calls onDone at the end
+  // position down to the landing spot, then squashes. Calls onDone at the end
   // (immediately when reduced-motion is on) so input can unlock.
   startDrop(type: TetrominoType, shape: Matrix, x: number, y: number, fromZ: number, toZ: number, onDone: () => void): void {
     if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
@@ -301,6 +362,15 @@ export class PieceMesh {
       if (isNewPiece) {
         this.spawnAge = 0;
       }
+    } else if (this.type) {
+      const material = this.materialFor(this.type);
+      const outline = this.outlineFor(this.type);
+      this.blocks.forEach((block) => {
+        if (block.visible) {
+          block.material = material;
+          (block.children[0] as THREE.LineSegments).material = outline;
+        }
+      });
     }
 
     this.applyShape(shape);
@@ -342,6 +412,17 @@ export class PieceMesh {
     this.targetPose = { ...DEFAULT_POSE };
   }
 
+  // Eases to one of the preset poses. It only ever moves the same targetPose
+  // that key 0 (resetView) and leaving inspect mode use, so the easing itself
+  // stays in update() — there is no second animation path to keep in sync.
+  snapView(snap: ViewSnap): void {
+    if (!this.inspecting) {
+      return;
+    }
+
+    this.targetPose = { ...SNAP_POSES[snap] };
+  }
+
   applyTilt(dx: number, dy: number): void {
     if (!this.inspecting) {
       return;
@@ -362,7 +443,7 @@ export class PieceMesh {
   update(delta: number): void {
     // Honor prefers-reduced-motion: snap to the target pose instead of easing.
     const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-    const rate = reducedMotion ? INSTANT_RATE : EASE_RATE;
+    const rate = reducedMotion ? INSTANT_RATE : easeRate();
     const blend = 1 - Math.exp(-rate * delta);
 
     this.pose.tiltX += (this.targetPose.tiltX - this.pose.tiltX) * blend;
@@ -545,17 +626,30 @@ export class PieceMesh {
     const tone = this.theme.tones[value as keyof ThemeContext['tones']];
     const color = tone ?? this.theme.boardBase;
 
-    let material = this.materials.get(color);
+    const key = `${value}|${patterns.get() ? 'p' : 'n'}`;
+    let material = this.materials.get(key);
 
     if (!material) {
       material = new THREE.MeshLambertMaterial({ color });
-      this.materials.set(color, material);
+      if (patterns.get() && value !== '.') {
+        const texture = getPatternTexture(value as TetrominoType, this.theme);
+        material.map = texture;
+      }
+      this.materials.set(key, material);
+    } else if (patterns.get() && value !== '.' && !material.map) {
+      const texture = getPatternTexture(value as TetrominoType, this.theme);
+      material.map = texture;
+      material.needsUpdate = true;
+    } else if (!patterns.get() && material.map) {
+      material.map = null;
+      material.needsUpdate = true;
     }
 
     return material;
   }
 
   dispose(): void {
+    this.stopPatterns?.();
     this.blockGeometry.dispose();
     this.blockEdgesGeometry.dispose();
     this.phantomEdge.geometry.dispose();

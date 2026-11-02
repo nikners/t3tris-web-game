@@ -1,6 +1,6 @@
 import { createSectionTypewriter } from './typewriter';
 
-const BRAND = 'Broccolis';
+const BRAND = 'T3TRIS';
 const NOTE = 'Original art and text. No gravity, no timer, no well.';
 
 export function createFooter(): HTMLElement {
