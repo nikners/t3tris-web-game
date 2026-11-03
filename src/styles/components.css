@@ -119,6 +119,7 @@
 }
 
 .mini-piece {
+  position: relative;
   display: grid;
   grid-template-columns: repeat(var(--mini-cols), var(--mini-cell));
   grid-template-rows: repeat(var(--mini-rows), var(--mini-cell));
@@ -170,6 +171,36 @@
 .mini-piece--z {
   --mini-tone: var(--tone-z);
   --mini-edge: var(--color-ink);
+}
+
+/* The colorblind pattern marking: an inline SVG laid over the squares, drawn
+   in the same mark tokens the 3D board uses. Dark tones take the light mark,
+   light tones take the dark mark, so the marking always reads against the
+   piece colour. */
+.mini-piece__mark {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+}
+
+.mini-piece__mark > * {
+  fill: currentColor;
+  stroke: currentColor;
+}
+
+.mini-piece--i,
+.mini-piece--o,
+.mini-piece--l,
+.mini-piece--z {
+  color: var(--color-mark-dark);
+}
+
+.mini-piece--j,
+.mini-piece--s,
+.mini-piece--t {
+  color: var(--color-mark);
 }
 
 /* On a phone the card sits above the board, so the three pieces line up in
