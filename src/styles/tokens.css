@@ -53,10 +53,10 @@
   --grid-line: var(--border-width) solid var(--color-line);
 
   /* type scale + tracking */
-  --fs-hero: clamp(48px, 7vw, 84px);
+  --fs-hero: clamp(40px, 6vw, 56px);
   --fs-h1: 40px;
-  --fs-h2: 28px;
-  --fs-h3: 20px;
+  --fs-h2: 24px;
+  --fs-h3: 18px;
   --fs-body: 16px;
   --fs-sm: 14px;
   --fs-caps: 12px;
@@ -77,6 +77,8 @@
 
   /* components */
   --icon-box: 40px;
+  /* The logo mark in the nav: fills the taller nav bar. */
+  --nav-mark: 48px;
   /* An icon that sits inline with text, inside a button or a label. */
   --icon-inline: 18px;
   /* The next-pieces card: the size of one square of a mini piece. */
@@ -85,9 +87,9 @@
   --mini-gap: 2px;
   /* How wide the card's body is, so the card keeps the same width. */
   --next-card-width: 92px;
-  --nav-lift: 24px;
-  /* The nav's border-box height: its 40px mark plus padding and border. */
-  --nav-height: 72px;
+  --nav-lift: 32px;
+  /* The nav's border-box height: its 48px mark plus padding and border. */
+  --nav-height: 80px;
   /* Room the floating nav needs above whatever it floats over. */
   --nav-clearance: calc(var(--nav-height) + var(--nav-lift));
   --layer-nav: 20;

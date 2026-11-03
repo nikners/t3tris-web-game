@@ -284,13 +284,13 @@
 .nav__brand {
   display: flex;
   align-items: center;
-  gap: var(--space-2);
+  gap: var(--space-3);
 }
 
 .nav__mark {
   display: block;
-  width: var(--icon-box);
-  height: var(--icon-box);
+  width: var(--nav-mark);
+  height: var(--nav-mark);
 }
 
 /* The logo mark: four blocks in a T, in the brand blue and orange. */
@@ -313,8 +313,8 @@
 .nav__links {
   display: flex;
   align-items: center;
-  gap: var(--space-1);
-  padding: var(--space-1);
+  gap: var(--space-2);
+  padding: var(--space-2);
   background-color: var(--color-blueprint);
   border-radius: var(--radius-pill);
 }
