@@ -133,6 +133,15 @@ const SPAWN_SECONDS = 0.15;
 // Blocks use MeshLambertMaterial (lit) — animate opacity via transparent flag.
 const SPAWN_START_SCALE = 0.6;
 
+// The center of a shape's filled cells, in shape coordinates. The resting
+// piece and the drop copy both center on it, so the two line up.
+function centerOf(cells: Array<[number, number]>): [number, number] {
+  const xs = cells.map(([sx]) => sx);
+  const ys = cells.map(([, sy]) => sy);
+
+  return [(Math.min(...xs) + Math.max(...xs)) / 2, (Math.min(...ys) + Math.max(...ys)) / 2];
+}
+
 // Builds the piece silhouette outline: every edge between a filled cell and an
 // empty neighbor (or the shape boundary). Interior edges are skipped.
 function buildSilhouette(cells: Cell[]): THREE.BufferGeometry {
@@ -292,10 +301,13 @@ export class PieceMesh {
     }
   }
 
-  // Plays the render-only hard-drop: copy of the piece slides from its prev
-  // position down to the landing spot, then squashes. Calls onDone at the end
-  // (immediately when reduced-motion is on) so input can unlock.
-  startDrop(type: TetrominoType, shape: Matrix, x: number, y: number, fromZ: number, toZ: number, onDone: () => void): void {
+  // Plays the render-only hard-drop: a copy of the piece slides from where it
+  // was down to where it locked, then squashes. The copy is built in the
+  // piece's own frame — the same cells and the same centering the resting
+  // piece uses — so it lines up with where the piece was before the drop.
+  // Calls onDone at the end (immediately when reduced-motion is on) so input
+  // can unlock.
+  startDrop(type: TetrominoType, shape: Matrix, x: number, y: number, ghostY: number, onDone: () => void): void {
     if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
       onDone();
       return;
@@ -306,33 +318,36 @@ export class PieceMesh {
     const material = this.materialFor(type);
     const outline = this.outlineFor(type);
 
+    const cells: Array<[number, number]> = [];
+
     shape.forEach((row, sy) => {
       row.forEach((cell, sx) => {
-        if (cell === '.') {
-          return;
+        if (cell !== '.') {
+          cells.push([sx, sy]);
         }
-
-        const block = new THREE.Mesh(this.blockGeometry, material);
-        block.add(new THREE.LineSegments(this.blockEdgesGeometry, outline));
-        block.position.set(sx - x, 0, sy - y);
-        this.dropRoot.add(block);
       });
     });
 
-    const centerX = (shape[0].length - 1) / 2;
-    const centerY = (shape.length - 1) / 2;
-    this.dropRoot.position.set(0, REST_HEIGHT, 0);
-    this.dropRoot.children.forEach((child) => {
-      child.position.x -= centerX;
-      child.position.z -= centerY;
-    });
+    const center = centerOf(cells);
 
-    this.dropRoot.position.z = fromZ;
+    for (const [sx, sy] of cells) {
+      const block = new THREE.Mesh(this.blockGeometry, material);
+      block.add(new THREE.LineSegments(this.blockEdgesGeometry, outline));
+      block.position.set(sx - center[0], 0, sy - center[1]);
+      this.dropRoot.add(block);
+    }
+
+    this.dropRoot.position.set(
+      x + center[0] - (WIDTH - 1) / 2,
+      REST_HEIGHT,
+      y + center[1] - (HEIGHT - 1) / 2,
+    );
+
     this.dropAnimation = {
       phase: 'slide',
       age: 0,
-      fromZ,
-      toZ,
+      fromZ: y + center[1] - (HEIGHT - 1) / 2,
+      toZ: ghostY + center[1] - (HEIGHT - 1) / 2,
       onDone,
       done: false,
     };
@@ -549,15 +564,10 @@ export class PieceMesh {
       });
     });
 
-    const xs = cells.map(([sx]) => sx);
-    const ys = cells.map(([, sy]) => sy);
-    const centerX: [number, number] = [
-      (Math.min(...xs) + Math.max(...xs)) / 2,
-      (Math.min(...ys) + Math.max(...ys)) / 2,
-    ];
+    const center = centerOf(cells);
 
     this.cells = cells;
-    this.center = centerX;
+    this.center = center;
 
     this.blocks.forEach((block, index) => {
       const cell = cells[index];
@@ -568,7 +578,7 @@ export class PieceMesh {
       }
 
       block.visible = true;
-      block.position.set(cell[0] - centerX[0], 0, cell[1] - centerX[1]);
+      block.position.set(cell[0] - center[0], 0, cell[1] - center[1]);
     });
   }
 

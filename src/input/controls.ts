@@ -152,16 +152,13 @@ export function createControls(options: ControlsOptions): Controls {
       return;
     }
 
-    // Inspect toggles stay available during the drop animation; only piece
-    // actions are frozen until the slide/squash finishes.
+    // The drop animation is short, but piece actions must not queue into it:
+    // the slide/squash runs on the piece that just locked, so moving the new
+    // piece mid-slide would read as a double input. The toggles stay
+    // available, so the player can watch the landing from a new angle or flip
+    // the patterns while the slide runs. Hard drop itself may still be pressed
+    // (logic treats it as instant, animation restarts).
     if (scene.isDropping() && !HARD_DROP.has(code) && !TOGGLE_INSPECT.has(code) && !RESET_VIEW.has(code) && !SOUND.has(code) && !PATTERNS.has(code)) {
-      return;
-    }
-
-    // Every piece action waits for the hard-drop animation to end so keys
-    // pressed mid-slide do not move the newly spawned piece. Hard drop itself
-    // may still be pressed (logic treats it as instant, animation restarts).
-    if (scene.isDropping() && !HARD_DROP.has(code)) {
       return;
     }
 
@@ -261,6 +258,10 @@ export function createControls(options: ControlsOptions): Controls {
     toggleInspect();
   }
 
+  function onSoundToggleClick(): void {
+    soundToggle?.element.blur();
+  }
+
   surface.addEventListener('pointerdown', onPointerDown);
   surface.addEventListener('pointermove', onPointerMove);
   surface.addEventListener('pointerup', onPointerUp);
@@ -268,9 +269,7 @@ export function createControls(options: ControlsOptions): Controls {
   surface.addEventListener('wheel', onWheel, { passive: false });
   owner.addEventListener('keydown', onKeyDown);
   inspectToggle?.addEventListener('click', onToggleClick);
-  soundToggle?.element.addEventListener('click', () => {
-    soundToggle?.element.blur();
-  });
+  soundToggle?.element.addEventListener('click', onSoundToggleClick);
 
   function dispose(): void {
     surface.removeEventListener('pointerdown', onPointerDown);
@@ -280,7 +279,7 @@ export function createControls(options: ControlsOptions): Controls {
     surface.removeEventListener('wheel', onWheel);
     owner.removeEventListener('keydown', onKeyDown);
     inspectToggle?.removeEventListener('click', onToggleClick);
-    soundToggle?.element.removeEventListener('click', () => {});
+    soundToggle?.element.removeEventListener('click', onSoundToggleClick);
     dragging = null;
   }
 

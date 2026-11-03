@@ -1,7 +1,7 @@
 import * as THREE from 'three';
 import { HEIGHT, WIDTH, merge, clearLines } from '../logic/board';
 import { TONE_TOKEN } from '../logic/pieces';
-import type { Matrix, TetrominoType } from '../logic/pieces';
+import type { TetrominoType } from '../logic/pieces';
 import type { GameState } from '../logic/game';
 import { BoardView } from './boardView';
 import { PieceMesh, type ViewSnap } from './pieceMesh';
@@ -192,47 +192,12 @@ export function createScene(container: HTMLElement): Scene {
     boardView.playClear(cleared.rows, settled, state.board);
   }
 
-  // Detects a hard drop between consecutive states and runs the render-only
-  // slide/squash. A drop means: same piece type and x, active y jumped down,
-  // and the landing position matches the previous ghost position exactly.
-  function detectDrop(state: GameState): void {
-    if (!latest) {
-      return;
-    }
-
-    const previous = latest;
-    const samePiece = previous.active.type === state.active.type;
-
-    if (!samePiece) {
-      return;
-    }
-
-    if (previous.active.x !== state.active.x) {
-      return;
-    }
-
-    if (state.active.y === previous.active.y) {
-      return;
-    }
-
-    if (state.active.y !== previous.ghostY) {
-      return;
-    }
-
-    const fromZ = previous.active.y + centerYOf(previous.active.shape) - (HEIGHT - 1) / 2;
-    const toZ = state.active.y + centerYOf(state.active.shape) - (HEIGHT - 1) / 2;
-
-    if (fromZ === toZ) {
-      return;
-    }
-
-    piece.startDrop(state.active.type, state.active.shape, state.active.x, state.active.y, fromZ, toZ, () => {});
-  }
-
   // Landing feedback: the logic locked the piece and spawned the next one, so
   // a change of the active piece is the signal that something landed. The
   // landing spot is where the ghost was, and the cells are the ones the piece
-  // filled. This only reads the two states — the logic stays untouched.
+  // filled. The drop slide runs from the same diff, so the piece is seen
+  // sliding into the very cells the flash then lights up. This only reads the
+  // two states — the logic stays untouched.
   function detectLanding(state: GameState): void {
     if (!latest || window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
       return;
@@ -242,6 +207,11 @@ export function createScene(container: HTMLElement): Scene {
 
     // The same piece means nothing was locked.
     if (previous.active.type === state.active.type) {
+      return;
+    }
+
+    // Holding swaps the piece without locking anything on the board.
+    if (state.holdUsed) {
       return;
     }
 
@@ -267,6 +237,18 @@ export function createScene(container: HTMLElement): Scene {
       return;
     }
 
+    // The render-only slide and squash: a copy of the piece travels from where
+    // it was to where it locked. The logic has already spawned the next piece,
+    // so the copy is built from the previous state's piece.
+    piece.startDrop(
+      previous.active.type,
+      previous.active.shape,
+      previous.active.x,
+      previous.active.y,
+      landingY,
+      () => {},
+    );
+
     landingFx.play(cells, previous.active.type, landingY - previous.active.y);
   }
 
@@ -288,20 +270,6 @@ export function createScene(container: HTMLElement): Scene {
     // Restart the animation when a shake is already running.
     void canvas.offsetWidth;
     canvas.classList.add(SHAKE_CLASS);
-  }
-
-  function centerYOf(shape: Matrix): number {
-    let min = Number.POSITIVE_INFINITY;
-    let max = Number.NEGATIVE_INFINITY;
-    for (let sy = 0; sy < shape.length; sy++) {
-      for (let sx = 0; sx < shape[sy].length; sx++) {
-        if (shape[sy][sx] !== '.') {
-          min = Math.min(min, sy);
-          max = Math.max(max, sy);
-        }
-      }
-    }
-    return (min + max) / 2;
   }
 
   function loop(): void {
@@ -329,7 +297,6 @@ export function createScene(container: HTMLElement): Scene {
   return {
     sync(state) {
       if (!latest || !isUndo(latest, state)) {
-        detectDrop(state);
         detectClear(state);
         detectLanding(state);
       }
