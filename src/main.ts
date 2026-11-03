@@ -139,7 +139,9 @@ void introReady.then(() => scene.start());
 attachScrollFade();
 
 // The theme refresh rebuilds the 3D views, so it waits for the intro to get
-// out of the way.
+// out of the way. It also waits for the webfonts: a settled font layout means
+// the stylesheet has applied, so the theme tokens are read as their real
+// values instead of empty strings.
 void introReady.then(async () => {
   await document.fonts?.ready;
   scene.refreshTheme();

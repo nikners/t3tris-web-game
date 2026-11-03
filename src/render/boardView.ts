@@ -129,10 +129,6 @@ export class BoardView {
   // pre-clear board), flash them white→blue while fading, then slide the rows
   // above down one row per cleared line. Logic already replaced the board; the
   // locked cells hide under the flash overlays until the slide finishes.
-  // Render-only line clear. Logic already collapsed the board; we show the
-  // cleared rows as bright overlays that pulse white→blue and fade, while the
-  // surviving rows visually slide down from their original positions. Done
-  // state restores the exact final board.
   playClear(rows: number[], settled: Board, finalBoard: Board): void {
     if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
       return; // logic already replaced the board; nothing to animate
@@ -142,10 +138,7 @@ export class BoardView {
 
     // Which original row feeds each final row (final rows start empty at top).
     const clearedSet = new Set(rows);
-    const sourceOfFinalRow: Array<number | null> = [];
-    for (let y = 0; y < HEIGHT; y++) {
-      sourceOfFinalRow.push(y < rows.length ? null : null);
-    }
+    const sourceOfFinalRow: Array<number | null> = new Array<number | null>(HEIGHT).fill(null);
     let nextFinal = rows.length;
     for (let y = 0; y < HEIGHT; y++) {
       if (!clearedSet.has(y)) {

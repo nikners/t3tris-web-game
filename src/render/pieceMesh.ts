@@ -89,6 +89,15 @@ function easeRate(): number {
 
 const INSTANT_RATE = 400;
 
+// The reduced-motion preference, read once and kept current by a listener, so
+// the render loop does not re-query the media query on every frame.
+const REDUCED_MOTION_QUERY = '(prefers-reduced-motion: reduce)';
+const reducedMotionQuery = window.matchMedia(REDUCED_MOTION_QUERY);
+let reducedMotion = reducedMotionQuery.matches;
+reducedMotionQuery.addEventListener('change', (event) => {
+  reducedMotion = event.matches;
+});
+
 const BLOCK_COUNT = 4;
 
 function clamp(value: number, min: number, max: number): number {
@@ -457,7 +466,6 @@ export class PieceMesh {
 
   update(delta: number): void {
     // Honor prefers-reduced-motion: snap to the target pose instead of easing.
-    const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
     const rate = reducedMotion ? INSTANT_RATE : easeRate();
     const blend = 1 - Math.exp(-rate * delta);
 
@@ -528,8 +536,7 @@ export class PieceMesh {
   // Drives the spawn-in animation: piece blocks fade from 0 to full opacity
   // and scale from SPAWN_START_SCALE to 1 over SPAWN_SECONDS.
   private applySpawnAge(): void {
-    const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-    const progress = reduced ? 1 : Math.min(this.spawnAge / SPAWN_SECONDS, 1);
+    const progress = reducedMotion ? 1 : Math.min(this.spawnAge / SPAWN_SECONDS, 1);
     const eased = 1 - Math.pow(1 - progress, 2); // ease-out
     const opacity = eased;
     const scale = SPAWN_START_SCALE + (1 - SPAWN_START_SCALE) * eased;
@@ -549,7 +556,6 @@ export class PieceMesh {
         material.opacity = 1;
         block.scale.setScalar(1);
       }
-      material.needsUpdate = false;
     }
   }
 

@@ -54,7 +54,6 @@
 
   /* type scale + tracking */
   --fs-hero: clamp(40px, 6vw, 56px);
-  --fs-h1: 40px;
   --fs-h2: 24px;
   --fs-h3: 18px;
   --fs-body: 16px;

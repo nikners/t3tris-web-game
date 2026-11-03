@@ -94,6 +94,8 @@ function migrateLegacyBest(): void {
     }
 
     window.localStorage.setItem(STORAGE_KEY, legacy);
+    // The score now lives under the new key, so the old one goes away.
+    window.localStorage.removeItem(decodeLegacyKey());
   } catch {
     // No storage to migrate: the best simply starts at zero for this visit.
   }

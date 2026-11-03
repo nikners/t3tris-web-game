@@ -51,10 +51,6 @@ body {
   scroll-margin-top: var(--nav-height);
 }
 
-.section--tight {
-  padding-block: var(--space-16);
-}
-
 .section--flush {
   padding-block: 0;
 }

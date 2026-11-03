@@ -54,7 +54,13 @@ export function createSnapButtons({ game, onSnap }: SnapButtonsOptions): SnapBut
   row.append(piece);
 
   const syncPiece = (): void => {
-    piece.textContent = `${game.getState().active.type}-PIECE`;
+    const label = `${game.getState().active.type}-PIECE`;
+
+    // The piece only changes when a new one spawns, so the label is rewritten
+    // only then — not on every move and turn.
+    if (piece.textContent !== label) {
+      piece.textContent = label;
+    }
   };
   syncPiece();
   game.subscribe(syncPiece);

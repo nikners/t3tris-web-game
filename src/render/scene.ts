@@ -100,9 +100,9 @@ export function createScene(container: HTMLElement): Scene {
   keyLight.position.set(5, 14, 9);
   scene.add(ambient, keyLight);
 
-  let boardView = new BoardView(readThemeTokens());
-  let piece = new PieceMesh(readThemeTokens());
-  let landingFx = new LandingFx(readThemeTokens(), { onShake: shake });
+  let boardView = new BoardView(theme);
+  let piece = new PieceMesh(theme);
+  let landingFx = new LandingFx(theme, { onShake: shake });
   scene.add(boardView.group, piece.group, landingFx.group);
 
   let latest: GameState | null = null;
@@ -143,10 +143,11 @@ export function createScene(container: HTMLElement): Scene {
     const previousBoard = boardView;
     const previousPiece = piece;
     const previousLanding = landingFx;
+    const nextTheme = readThemeTokens();
 
-    boardView = new BoardView(readThemeTokens());
-    piece = new PieceMesh(readThemeTokens());
-    landingFx = new LandingFx(readThemeTokens(), { onShake: shake });
+    boardView = new BoardView(nextTheme);
+    piece = new PieceMesh(nextTheme);
+    landingFx = new LandingFx(nextTheme, { onShake: shake });
 
     scene.remove(previousBoard.group, previousPiece.group, previousLanding.group);
     previousBoard.dispose();
