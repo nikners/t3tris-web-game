@@ -8,6 +8,17 @@
 // CSS owns the look and this module only decides when a section is active,
 // how far it is shifted and how dim it gets.
 //
+// A section takes the spotlight when it comfortably fills the screen: either
+// it covers half the viewport, or it is essentially fully on screen. The
+// first rule keeps a tall section bright for the whole time it is being
+// read; the second covers short bands and the last section, which is pinned
+// to the bottom of the page and can never cover half the viewport. Either
+// way a section never goes bright while it is still peeking in from an edge.
+//
+// The shift always points away from the edge the section sits at, so it is
+// derived from the section's position, not from the scroll direction — it
+// cannot flip mid-fade when the direction changes.
+//
 // Nothing is hidden: the faded sections keep their opacity, their place in
 // the tab order and their text, so keyboard focus, Ctrl+F and screen readers
 // still reach everything.
@@ -16,13 +27,17 @@
 // the sections back), so every section stays fully visible and unshifted.
 import { readToken } from './tokens';
 
-const ACTIVE_RATIO = 0.5;
-// A section taller than the viewport is active once it covers this much of
-// the screen.
-const TALL_SECTION_TOLERANCE = 0.9;
+// A section takes the spotlight once it comfortably fills the screen: either
+// it covers this share of the viewport, or it is (almost) entirely on screen.
+const FILL_RATIO = 0.5;
+
+const FULLY_VISIBLE_RATIO = 0.98;
+
 // The observer reports at every step of the way, so a section that is only
-// just big enough to be active is caught at the right moment.
-const OBSERVER_THRESHOLDS = [0, 0.1, 0.2, 0.3, 0.4, 0.5];
+// just big enough to be active is caught at the right moment. The top of the
+// range matters for short sections: their ratio saturates at 1 while their
+// position keeps moving, and the fully-visible rule needs that last step.
+const OBSERVER_THRESHOLDS = [0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1];
 const SHIFT_TOKEN = '--fade-shift';
 const DIM_TOKEN = '--fade-dim';
 const PLAY_DIM_TOKEN = '--fade-dim-play';
@@ -33,8 +48,6 @@ export const SECTION_ACTIVE_EVENT = 't3tris:section-active';
 /** Fired on a section when it hands the spotlight over. */
 export const SECTION_INACTIVE_EVENT = 't3tris:section-inactive';
 
-type Direction = 'down' | 'up';
-
 interface FadeTarget {
   element: HTMLElement;
   /** The opacity the section drops to while it is out of the spotlight. */
@@ -43,8 +56,6 @@ interface FadeTarget {
   ratio: number;
   /** True while the section is the active one. */
   active: boolean;
-  /** The share of the section that has to be on screen to call it active. */
-  threshold: number;
 }
 
 /**
@@ -81,39 +92,14 @@ export function attachScrollFade(container: ParentNode = document): void {
     dimOpacity: element.id === 'play' ? playDim : dim,
     ratio: 0,
     active: false,
-    threshold: ACTIVE_RATIO,
   }));
 
-  let direction: Direction = 'down';
-  let lastScrollY = window.scrollY;
   let observer: IntersectionObserver | null = null;
 
-  // The direction only decides which way a section slides, so a plain
-  // passive listener is enough — the wheel is never touched.
-  window.addEventListener(
-    'scroll',
-    () => {
-      const y = window.scrollY;
-
-      if (y > lastScrollY) {
-        direction = 'down';
-      } else if (y < lastScrollY) {
-        direction = 'up';
-      }
-
-      lastScrollY = y;
-    },
-    { passive: true },
-  );
-
-  // A section enters from the side it comes in from and leaves towards the
-  // side it goes out through.
-  function enteringShift(): number {
-    return direction === 'down' ? shift : -shift;
-  }
-
-  function leavingShift(): number {
-    return direction === 'down' ? -shift : shift;
+  // The shift always points away from the edge the section sits at: a section
+  // below the viewport slides up into place, one above slides down into it.
+  function shiftFor(rect: DOMRect): number {
+    return rect.top >= 0 ? shift : -shift;
   }
 
   // Writes the state onto the section. With `instant` the change is committed
@@ -150,17 +136,16 @@ export function attachScrollFade(container: ParentNode = document): void {
     for (const target of targets) {
       const rect = target.element.getBoundingClientRect();
       const ratio = visibleRatio(rect, window.innerHeight);
-      target.threshold = activeThreshold(rect.height);
       target.ratio = ratio;
 
-      const active = ratio >= target.threshold;
+      const active = isActive(rect, ratio);
 
       if (active !== target.active) {
         target.active = active;
         announce(target, active);
       }
 
-      const offset = target.active ? 0 : rect.top >= 0 ? enteringShift() : leavingShift();
+      const offset = target.active ? 0 : shiftFor(rect);
       paint(target, target.active ? 1 : target.dimOpacity, offset, instant);
     }
   }
@@ -174,16 +159,17 @@ export function attachScrollFade(container: ParentNode = document): void {
       }
 
       const ratio = entry.intersectionRatio;
+      const rect = entry.boundingClientRect;
       const rising = ratio > target.ratio;
       target.ratio = ratio;
 
-      const active = ratio >= target.threshold;
+      const active = isActive(rect, ratio);
 
       if (active === target.active) {
         if (!active && rising) {
           // It is on its way in but not the active one yet: hold it on the
           // side it enters from.
-          paint(target, target.dimOpacity, enteringShift(), false);
+          paint(target, target.dimOpacity, shiftFor(rect), false);
         }
 
         continue;
@@ -194,11 +180,11 @@ export function attachScrollFade(container: ParentNode = document): void {
 
       if (active) {
         // It takes over: start on the side it enters from, then fade in.
-        paint(target, target.dimOpacity, enteringShift(), true);
+        paint(target, target.dimOpacity, shiftFor(rect), true);
         paint(target, 1, 0, false);
       } else {
         // It hands over: dim down and slide towards the edge it leaves by.
-        paint(target, target.dimOpacity, leavingShift(), false);
+        paint(target, target.dimOpacity, shiftFor(rect), false);
       }
     }
   }
@@ -234,8 +220,8 @@ export function attachScrollFade(container: ParentNode = document): void {
     }
   }
 
-  // A resize changes how much of a section fits on screen, so the thresholds
-  // and the state are worked out again.
+  // A resize changes how much of a section fits on screen, so the state is
+  // worked out again.
   window.addEventListener(
     'resize',
     () => {
@@ -270,15 +256,16 @@ function visibleRatio(rect: DOMRect, viewportHeight: number): number {
   return Math.max(0, visible) / Math.max(rect.height, 1);
 }
 
-// How much of a section has to be on screen before it counts as the active
-// one. A section taller than the viewport can never be fully in view, so it
-// counts as active once it covers most of the screen.
-function activeThreshold(height: number): number {
-  if (height <= 0) {
-    return ACTIVE_RATIO;
-  }
+// A section takes the spotlight when it comfortably fills the screen. Covering
+// half the viewport is the rule for sections as tall as the screen or taller;
+// a short band, or the last section pinned to the bottom of the page, can
+// never cover that much, so it counts once it is essentially fully on screen
+// instead of while it is still peeking in from the edge.
+function isActive(rect: DOMRect, ratio: number): boolean {
+  const viewportHeight = window.innerHeight;
+  const visible = Math.min(rect.bottom, viewportHeight) - Math.max(rect.top, 0);
 
-  return Math.min(ACTIVE_RATIO, (window.innerHeight / height) * TALL_SECTION_TOLERANCE);
+  return visible >= FILL_RATIO * viewportHeight || ratio >= FULLY_VISIBLE_RATIO;
 }
 
 function readNumber(token: string, fallback: number): number {

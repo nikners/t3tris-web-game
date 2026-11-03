@@ -46,13 +46,13 @@ body {
 }
 
 .section {
-  padding-block: var(--space-16);
+  padding-block: var(--space-20);
   /* Anchor targets land below the floating nav. */
   scroll-margin-top: var(--nav-height);
 }
 
 .section--tight {
-  padding-block: var(--space-12);
+  padding-block: var(--space-16);
 }
 
 .section--flush {
@@ -62,7 +62,7 @@ body {
 .stack {
   display: flex;
   flex-direction: column;
-  gap: var(--space-8);
+  gap: var(--space-12);
 }
 
 .cluster {
@@ -102,7 +102,7 @@ body {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: var(--space-4);
+  gap: var(--space-6);
   min-height: 100svh;
   padding-top: var(--nav-clearance);
   /* The extra lift keeps the bar off the bottom edge when the section is
@@ -180,7 +180,7 @@ body {
 
 .marquee {
   overflow: hidden;
-  padding-block: var(--space-4);
+  padding-block: var(--space-6);
 }
 
 .marquee__track {
