@@ -47,7 +47,7 @@ body {
 
 .section {
   padding-block: var(--space-20);
-  /* Anchor targets land below the floating nav. */
+  /* Anchor targets land below the sticky nav. */
   scroll-margin-top: var(--nav-height);
 }
 
@@ -72,19 +72,25 @@ body {
   gap: var(--space-4);
 }
 
+/* The nav is a sticky bar, flush with the top of the viewport: a solid
+   surface with a hairline bottom border, spanning the full viewport width.
+   The inner row (.nav__inner) keeps the logo and the links on the page's
+   content column. */
 .nav {
   position: sticky;
   top: var(--nav-lift);
   z-index: var(--layer-nav);
+  min-height: var(--nav-height);
+  padding-block: var(--space-4);
+  background-color: var(--color-card);
+  border-bottom: var(--grid-line);
+}
+
+.nav__inner {
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: var(--space-4);
-  min-height: var(--nav-height);
-  padding: var(--space-4);
-  background-color: var(--color-card);
-  border: var(--card-border);
-  border-radius: var(--radius-pill);
 }
 
 .hero {
@@ -95,7 +101,7 @@ body {
 }
 
 /* The game lives in its own full-height section, so the board always has a
-   screen to itself. The top padding clears the floating nav, and the stage
+   screen to itself. The top padding clears the sticky bar, and the stage
    takes whatever height is left, which keeps the board inside the viewport
    on a short desktop window and on a phone. */
 .play {
@@ -105,10 +111,11 @@ body {
   gap: var(--space-6);
   min-height: 100svh;
   padding-top: var(--nav-clearance);
-  /* The extra lift keeps the bar off the bottom edge when the section is
-     jumped to, because the jump lands the section below the nav. */
+  /* The bottom padding keeps the controls off the viewport edge when the
+     section is jumped to. */
   padding-bottom: calc(var(--space-6) + var(--nav-lift));
-  /* Jumping to the game lands it right under the floating nav. */
+  /* Jumping to the game lands it flush at the top; the bar covers only the
+     section's top padding. */
   scroll-margin-top: var(--nav-lift);
 }
 

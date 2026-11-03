@@ -1,8 +1,13 @@
 import { createLogoMark } from './logo';
 
 export function createNav(): HTMLElement {
+  // The bar spans the full viewport width; the inner row keeps the brand, the
+  // links and the call to action on the page's content column.
   const nav = document.createElement('nav');
-  nav.className = 'nav container';
+  nav.className = 'nav';
+
+  const row = document.createElement('div');
+  row.className = 'nav__inner container';
 
   const brand = document.createElement('a');
   brand.className = 'nav__brand';
@@ -35,6 +40,8 @@ export function createNav(): HTMLElement {
   cta.href = '#play';
   cta.textContent = 'START GAME';
 
-  nav.append(brand, links, cta);
+  row.append(brand, links, cta);
+  nav.append(row);
+
   return nav;
 }

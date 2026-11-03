@@ -310,28 +310,30 @@
   color: var(--color-ink);
 }
 
+/* The links are plain text, pushed to the right next to the call to action. */
 .nav__links {
   display: flex;
   align-items: center;
-  gap: var(--space-2);
-  padding: var(--space-2);
-  background-color: var(--color-blueprint);
-  border-radius: var(--radius-pill);
+  gap: var(--space-6);
+  margin-left: auto;
 }
 
 .nav__link {
-  padding: var(--space-2) var(--space-4);
+  padding: var(--space-2) 0;
   font-family: var(--font-body);
   font-size: var(--fs-sm);
   font-weight: 600;
+  letter-spacing: var(--track-caps);
   color: var(--color-ink);
   text-decoration: none;
-  border-radius: var(--radius-pill);
-  transition: background-color var(--transition) var(--ease-soft);
+  transition: color var(--transition) var(--ease-soft);
 }
 
 .nav__link:hover {
-  background-color: var(--color-card);
+  color: var(--color-blue);
+  text-decoration: underline;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 4px;
 }
 
 .cta {

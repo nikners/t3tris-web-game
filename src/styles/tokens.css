@@ -87,10 +87,12 @@
   --mini-gap: 2px;
   /* How wide the card's body is, so the card keeps the same width. */
   --next-card-width: 92px;
-  --nav-lift: 32px;
-  /* The nav's border-box height: its 48px mark plus padding and border. */
-  --nav-height: 80px;
-  /* Room the floating nav needs above whatever it floats over. */
+  /* The bar is flush with the top of the viewport, so there is no lift. */
+  --nav-lift: 0px;
+  /* The nav's border-box height: its 48px mark, 16px of padding top and
+     bottom, and the 1px bottom border. */
+  --nav-height: 81px;
+  /* Room the stuck bar needs above whatever it overlaps. */
   --nav-clearance: calc(var(--nav-height) + var(--nav-lift));
   --layer-nav: 20;
   --layer-overlay: 40;
