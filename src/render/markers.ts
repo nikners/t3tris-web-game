@@ -6,6 +6,17 @@ const SIZE = 64;
 
 const cache = new Map<TetrominoType, THREE.CanvasTexture>();
 
+// The dark tones take the light mark, the light tones take the dark mark, so
+// the marking always reads against the piece colour — the same split the DOM
+// mini pieces use.
+const DARK_TONE_TYPES: readonly TetrominoType[] = ['T', 'S', 'J'];
+
+// The mark colours the cached textures were drawn with. A theme change
+// invalidates them, so the cache is dropped — and the textures disposed —
+// when the colours differ from the ones the cache was built with.
+let cachedMark = '';
+let cachedMarkDark = '';
+
 function drawMarking(
   ctx: CanvasRenderingContext2D,
   type: TetrominoType,
@@ -13,12 +24,8 @@ function drawMarking(
 ): void {
   ctx.clearRect(0, 0, SIZE, SIZE);
 
-  // Use a light mark on dark tones, dark mark on light tones for contrast.
-  // Default to mark (light) unless a specific pattern needs dark.
-  const primary = mark;
-
-  ctx.fillStyle = primary;
-  ctx.strokeStyle = primary;
+  ctx.fillStyle = mark;
+  ctx.strokeStyle = mark;
   ctx.lineWidth = 6;
   ctx.lineCap = 'round';
   ctx.lineJoin = 'round';
@@ -31,8 +38,6 @@ function drawMarking(
     ctx.fillRect(pad, center - 4, SIZE - pad * 2, 8);
   } else if (type === 'O') {
     // square outline
-    ctx.strokeStyle = primary;
-    ctx.lineWidth = 6;
     ctx.strokeRect(pad + 2, pad + 2, SIZE - (pad + 2) * 2, SIZE - (pad + 2) * 2);
   } else if (type === 'T') {
     // triangle
@@ -71,6 +76,12 @@ function drawMarking(
 }
 
 export function getPatternTexture(type: TetrominoType, theme: ThemeContext): THREE.CanvasTexture {
+  if (theme.mark !== cachedMark || theme.markDark !== cachedMarkDark) {
+    clearCache();
+    cachedMark = theme.mark;
+    cachedMarkDark = theme.markDark;
+  }
+
   const cached = cache.get(type);
   if (cached) {
     return cached;
@@ -87,7 +98,7 @@ export function getPatternTexture(type: TetrominoType, theme: ThemeContext): THR
     return texture;
   }
 
-  drawMarking(ctx, type, theme.mark);
+  drawMarking(ctx, type, DARK_TONE_TYPES.includes(type) ? theme.mark : theme.markDark);
 
   const texture = new THREE.CanvasTexture(canvas);
   texture.needsUpdate = true;
@@ -95,4 +106,9 @@ export function getPatternTexture(type: TetrominoType, theme: ThemeContext): THR
   texture.wrapT = THREE.ClampToEdgeWrapping;
   cache.set(type, texture);
   return texture;
+}
+
+function clearCache(): void {
+  cache.forEach((texture) => texture.dispose());
+  cache.clear();
 }
